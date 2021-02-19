@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="false" userDefinedModelVersionIdentifier="">
-    <elements/>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17709" systemVersion="20C69" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="ArticlePreview" representedClassName="ArticlePreview" syncable="YES">
+        <attribute name="articleDesription" optional="YES" attributeType="String"/>
+        <attribute name="articlePath" attributeType="String"/>
+        <attribute name="dateForSorting" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="imagePath" optional="YES" attributeType="String"/>
+        <attribute name="isViewed" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="publishDate" attributeType="String"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <relationship name="searchText" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SearchText" inverseName="news" inverseEntity="SearchText"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="articlePath"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="SearchText" representedClassName="SearchText" syncable="YES">
+        <attribute name="dateForSorting" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="value" attributeType="String"/>
+        <relationship name="news" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ArticlePreview" inverseName="searchText" inverseEntity="ArticlePreview"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="value"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <elements>
+        <element name="ArticlePreview" positionX="-36" positionY="9" width="128" height="149"/>
+        <element name="SearchText" positionX="-54" positionY="-9" width="128" height="74"/>
+    </elements>
 </model>

@@ -24,7 +24,11 @@ extension ApiEndpoint: EndpointProtocol {
     }
     
     var params: [String : String] {
-        var queryParams = ["apiKey" : "0fa2296c3e0c4b03bcffabfc169fa429", "language" : Locale.current.regionCode ?? "en"]
+        var queryParams = [
+            "apiKey" : "0fa2296c3e0c4b03bcffabfc169fa429",
+            "language" : Locale.current.regionCode ?? "en",
+            "sortBy" : "publishedAt"
+        ]
         
         switch self {
         case let .searchNews(text: text, page: page):

@@ -80,9 +80,9 @@ class NewsTableViewCell: UITableViewCell {
 //        tableView.separatorStyle = .none
     }
     
-    func configure(title: String, description: String, image: UIImage) {
-        titleLabel.text = title
-        descriptionLabel.text = description
-        newsImage.image = image
+    func configure(article: ArticlePreview) {
+        titleLabel.text = article.title
+        descriptionLabel.text = article.articleDesription
+//        newsImage.image = image
     }
 }
