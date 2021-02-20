@@ -4,6 +4,7 @@
         <attribute name="articleDesription" optional="YES" attributeType="String"/>
         <attribute name="articlePath" attributeType="String"/>
         <attribute name="dateForSorting" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="String"/>
         <attribute name="imagePath" optional="YES" attributeType="String"/>
         <attribute name="isViewed" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="publishDate" attributeType="String"/>
@@ -11,7 +12,7 @@
         <relationship name="searchText" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SearchText" inverseName="news" inverseEntity="SearchText"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
-                <constraint value="articlePath"/>
+                <constraint value="id"/>
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
@@ -26,7 +27,7 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="ArticlePreview" positionX="-36" positionY="9" width="128" height="149"/>
+        <element name="ArticlePreview" positionX="-36" positionY="9" width="128" height="164"/>
         <element name="SearchText" positionX="-54" positionY="-9" width="128" height="74"/>
     </elements>
 </model>

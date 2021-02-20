@@ -107,38 +107,24 @@ extension SearchViewController: NSFetchedResultsControllerDelegate {
     }
     
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        guard let indexPath = indexPath, let newIndexPath = newIndexPath else { return }
-        
         switch type {
         case .insert:
+            guard let newIndexPath = newIndexPath else { return }
             tableView.insertRows(at: [newIndexPath], with: .fade)
         case .delete:
-            tableView.deleteRows(at: [newIndexPath], with: .fade)
+            guard let indexPath = indexPath else { return }
+            tableView.deleteRows(at: [indexPath], with: .fade)
         case .update:
-            tableView.reloadRows(at: [newIndexPath], with: .fade)
+            guard let indexPath = indexPath else { return }
+            tableView.reloadRows(at: [indexPath], with: .fade)
         case .move:
+            guard let newIndexPath = newIndexPath, let indexPath = indexPath else { return }
             tableView.deleteRows(at: [indexPath], with: .fade)
             tableView.insertRows(at: [newIndexPath], with: .fade)
         @unknown default:
             print("Add new case to didChange anObject")
         }
     }
-    
-//    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
-//        switch type {
-//        case .insert:
-//            tableView.insertSections([sectionIndex], with: .fade)
-//        case .delete:
-//            tableView.deleteSections([sectionIndex], with: .fade)
-//        case .update:
-//            tableView.reloadSections([sectionIndex], with: .fade)
-//        case .move:
-//            tableView.deleteSections([sectionIndex], with: .fade)
-//            tableView.insertSections([sectionIndex], with: .fade)
-//        @unknown default:
-//            print("Add new case to didChange sectionInfo")
-//        }
-//    }
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
@@ -155,8 +141,20 @@ extension SearchViewController: UISearchBarDelegate {
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        guard let searchText = searchBar.text, searchText != "" else { return }
-        searchController.searchBar.showsCancelButton = true
+        
+        searchController.searchBar.showsCancelButton = false
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        guard
+            let searchText = searchBar.text,
+            !searchText.trimmingCharacters(in: .whitespaces).isEmpty
+        else {
+            searchBar.setShowsCancelButton(false, animated: false)
+            return
+        }
+        
+        searchBar.setShowsCancelButton(true, animated: true)
     }
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {

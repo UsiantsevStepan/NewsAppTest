@@ -23,6 +23,7 @@ extension ArticlePreview {
     @NSManaged public var publishDate: String
     @NSManaged public var title: String?
     @NSManaged public var dateForSorting: Date
+    @NSManaged public var id: String
     @NSManaged public var searchText: NSSet?
 
 }

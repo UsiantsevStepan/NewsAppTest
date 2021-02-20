@@ -37,6 +37,7 @@ private extension NetworkManager {
         guard let url = urlComponents.url else { return nil }
         
         let urlRequest = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
+        print(urlRequest.url)
         return urlRequest
     }
     

@@ -19,7 +19,6 @@ class NewsManager {
     
     private let networkManager = NetworkManager()
     private let dataParser = DataParser()
-//    private var searchData = [Article]()
     private var searchTotalResults = 0
     private var searchData = [(String, [Article])]()
     
@@ -27,19 +26,15 @@ class NewsManager {
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let persistentStoreCoordinator = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.persistentStoreCoordinator
     
-//    func getNews(searchText: String) -> (String, [NewsPreviewCellModel]) {
-//        let fetchedNews = fetchNews(searchText: searchText)
-//        return (searchText, setSearchedNewsPreviewCellModel(from: fetchedNews))
-//    }
-    
-    public func loadSearchedMovies(searchText: String, page: Int, completion: @escaping ((Result<(Int), Error>)) -> Void) {
+    public func loadSerchedNews(searchText: String, date: Date, completion: @escaping ((Result<Int, Error>)) -> Void) {
         let group = DispatchGroup()
         let queue = DispatchQueue.global(qos: .background)
         
         group.enter()
         queue.async {
-            self.networkManager.getData(with: ApiEndpoint.searchNews(text: searchText, page: page)) { [weak self] result in
+            self.networkManager.getData(with: ApiEndpoint.searchNewsUpTo(text: searchText, date: date.iso8601withFractionalSeconds)) { [weak self] result in
                 guard let self = self else { return }
+                
                 switch result {
                 case let .failure(error):
                     completion(.failure(error))
@@ -56,7 +51,6 @@ class NewsManager {
                 }
             }
         }
-        
         group.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             
@@ -82,6 +76,7 @@ class NewsManager {
             
             newArticle.title = article.title
             newArticle.articleDesription = article.description
+            newArticle.id = (article.title ?? "") + (article.description ?? "")
             newArticle.articlePath = article.url
             newArticle.imagePath = article.urlToImage
             newArticle.publishDate = dateFormat(with: article.publishedAt)
@@ -98,44 +93,6 @@ class NewsManager {
             print(error, error.localizedDescription)
         }
     }
-    
-//    func fetchNews(searchText: String) -> [ArticlePreview] {
-//        do {
-//            let request = SearchText.createFetchRequest() as NSFetchRequest<SearchText>
-//
-//            let predicate = NSPredicate(format: "searchText CONTAINS %@", searchText)
-//            request.predicate = predicate
-//
-//            let newsList = try context.fetch(request)
-//            let newsSet = newsList.first?.news?.allObjects as? [ArticlePreview] ?? []
-////            let sortedNews = newsSet.sorted { $0.publishDate > $1.publishDate }
-//            return newsSet
-//        } catch {
-//            return []
-//        }
-//    }
-    
-//    func fetchPreviousSearchRequests() -> [SearchText] {
-//        do {
-//            let request = SearchText.createFetchRequest() as NSFetchRequest<SearchText>
-//            let searchRequests = try context.fetch(request)
-//            let sortedSearchRequests = searchRequests.sorted { $0.date > $1.date }
-//
-//            return sortedSearchRequests
-//        } catch {
-//            return []
-//        }
-//    }
-    
-//    private func setSearchedNewsPreviewCellModel(from newsData: [ArticlePreview]) -> [NewsPreviewCellModel] {
-//        return newsData.map { article -> NewsPreviewCellModel in
-//            return NewsPreviewCellModel(
-//                title: article.title,
-//                description: article.articleDesription,
-//                imagePath: article.imagePath ?? ""
-//            )
-//        }
-//    }
 }
 
 private extension NewsManager {
@@ -144,5 +101,27 @@ private extension NewsManager {
         dateFormatter.locale = .current
         dateFormatter.dateFormat = "dd MMMM yyyy"
         return dateFormatter.string(from: date)
+    }
+    
+    func stringFromDate(date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        return dateFormatter.string(from: date)
+    }
+}
+
+extension ISO8601DateFormatter {
+    convenience init(_ formatOptions: Options) {
+        self.init()
+        self.formatOptions = formatOptions
+    }
+}
+
+extension Formatter {
+    static let iso8601withFractionalSeconds = ISO8601DateFormatter([.withInternetDateTime, .withFractionalSeconds])
+}
+
+extension Date {
+    var iso8601withFractionalSeconds: String {
+        return Formatter.iso8601withFractionalSeconds.string(from: self)
     }
 }

@@ -11,16 +11,16 @@ import CoreData
 class SearchResultsViewController: UIViewController {
     private let newsManager = NewsManager()
     private var totalResults = 0
-    private var currentPage = 1
     private var fetchedResultsController: NSFetchedResultsController<ArticlePreview>!
     private var container = (UIApplication.shared.delegate as! AppDelegate).persistentContainer
+    private let footerView = FooterView()
+    private var isLoading = false
+    private var isPageAfterDB = false
     
     let tableView = UITableView()
     var searchText = ""
     
-    //    let news: [(String, String)] = [("News", "qereqreqteqqeteqtqe eqreq qereq qereiq peoqir poqeipri pqeir peqir popeqi rpqeior poqei prq"), ("Neqro eqo", "QEReqre qer qer eqrqer qer qerqe"), ("Qer ovovov", "eqrqe qer eqr eqr eqreqreqr"), ("eqreqrer eqreqreqre qreq", "eqrqereqreqrqereqreqr eqrreq reqr eqr")]
     var news = [NewsPreviewCellModel]()
-    let newsImages: [UIImage] = [#imageLiteral(resourceName: "placeholder"), #imageLiteral(resourceName: "placeholder"), #imageLiteral(resourceName: "placeholder"), #imageLiteral(resourceName: "placeholder")]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,7 +31,7 @@ class SearchResultsViewController: UIViewController {
         setConstraints()
         configureSubviews()
         
-        loadPage(with: searchText, pageNumber: currentPage)
+        loadPage(with: searchText)
     }
     
     func loadSavedData() {
@@ -53,7 +53,6 @@ class SearchResultsViewController: UIViewController {
             fetchedResultsController.delegate = self
         }
         
-        //        fetchedResultsController.fetchRequest.predicate =
         do {
             try fetchedResultsController.performFetch()
             tableView.reloadData()
@@ -62,22 +61,49 @@ class SearchResultsViewController: UIViewController {
         }
     }
     
-    private func loadPage(with searchText: String, pageNumber: Int) {
-        newsManager.loadSearchedMovies(searchText: searchText, page: pageNumber) { [weak self] result in
+    private func loadPage(with searchText: String) {
+        newsManager.loadSerchedNews(searchText: searchText, date: Date()) { [weak self] result in
             guard let self = self else { return }
+            
             switch result {
             case let .failure(error):
                 print(error.localizedDescription)
                 return
-            case let .success(totalResults):
-                self.totalResults = totalResults
-                //                self.news += news
-                self.currentPage += 1
+            case let .success(data):
+                self.totalResults = data
             }
             DispatchQueue.main.async {
                 self.loadSavedData()
             }
         }
+    }
+    
+    private func loadNextPage(with searchText: String) {
+        if isLoading { return }
+        isLoading = true
+        footerView.showActivityIndicator()
+        
+        guard let date = fetchedResultsController.fetchedObjects?.last?.dateForSorting else {
+            isLoading = false
+            footerView.hideActivityIndicator()
+            return
+        }
+        
+        newsManager.loadSerchedNews(searchText: searchText, date: date) { [weak self] result in
+                guard let self = self else { return }
+                
+                switch result {
+                case let .failure(error):
+                    print(error.localizedDescription)
+                    return
+                case .success:
+                    DispatchQueue.main.async {
+                        self.loadSavedData()
+                    }
+                }
+                self.footerView.hideActivityIndicator()
+                self.isLoading = false
+            }
     }
     
     private func addSubviews() {
@@ -96,12 +122,11 @@ class SearchResultsViewController: UIViewController {
     }
     
     private func configureSubviews() {
+        tableView.tableFooterView = footerView
         tableView.delegate = self
         tableView.dataSource = self
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 100
-        //        tableView.estimatedRowHeight = 64
-        //        tableView.separatorStyle = .none
     }
 }
 
@@ -138,6 +163,15 @@ extension SearchResultsViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return fetchedResultsController.sections?[section].name
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        
+        if offsetY > 0, offsetY > contentHeight - scrollView.frame.height - 200 {
+            loadNextPage(with: searchText)
+        }
     }
 }
 
