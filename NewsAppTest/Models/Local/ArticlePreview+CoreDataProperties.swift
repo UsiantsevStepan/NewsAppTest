@@ -2,7 +2,7 @@
 //  ArticlePreview+CoreDataProperties.swift
 //  NewsAppTest
 //
-//  Created by Степан Усьянцев on 19.02.2021.
+//  Created by Степан Усьянцев on 20.02.2021.
 //
 //
 
@@ -18,12 +18,12 @@ extension ArticlePreview {
 
     @NSManaged public var articleDesription: String?
     @NSManaged public var articlePath: String
+    @NSManaged public var dateForSorting: Date
+    @NSManaged public var id: String
     @NSManaged public var imagePath: String?
     @NSManaged public var isViewed: Bool
     @NSManaged public var publishDate: String
     @NSManaged public var title: String?
-    @NSManaged public var dateForSorting: Date
-    @NSManaged public var id: String
     @NSManaged public var searchText: NSSet?
 
 }

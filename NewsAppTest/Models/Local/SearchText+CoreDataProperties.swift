@@ -2,7 +2,7 @@
 //  SearchText+CoreDataProperties.swift
 //  NewsAppTest
 //
-//  Created by Степан Усьянцев on 19.02.2021.
+//  Created by Степан Усьянцев on 20.02.2021.
 //
 //
 
@@ -16,8 +16,8 @@ extension SearchText {
         return NSFetchRequest<SearchText>(entityName: "SearchText")
     }
 
-    @NSManaged public var value: String
     @NSManaged public var dateForSorting: Date
+    @NSManaged public var value: String
     @NSManaged public var news: NSSet?
 
 }
