@@ -12,7 +12,6 @@ class SearchViewController: UIViewController {
     private let searchController = UISearchController(searchResultsController: nil)
     private let tableView = UITableView()
     private let newsManager = NewsManager()
-//    private var searchRequests = [SearchText]()
     private var fetchedResultsController: NSFetchedResultsController<SearchText>!
     private var container = (UIApplication.shared.delegate as! AppDelegate).persistentContainer
     
@@ -37,9 +36,9 @@ class SearchViewController: UIViewController {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-
+        
         self.next?.touchesBegan(touches, with: event)
-
+        
         searchController.searchBar.endEditing(true)
         searchController.searchBar.text = ""
         searchController.searchBar.showsCancelButton = false
@@ -52,12 +51,10 @@ class SearchViewController: UIViewController {
             let request = SearchText.createFetchRequest()
             let sort = NSSortDescriptor(key: "dateForSorting", ascending: false)
             request.sortDescriptors = [sort]
-//            request.fetchBatchSize = 20
             
             fetchedResultsController = NSFetchedResultsController(
                 fetchRequest: request,
                 managedObjectContext: container.viewContext,
-                //                sectionNameKeyPath: "searchText.searchText",
                 sectionNameKeyPath: nil,
                 cacheName: nil
             )
@@ -66,7 +63,7 @@ class SearchViewController: UIViewController {
         
         do {
             try fetchedResultsController.performFetch()
-            tableView.reloadData()
+            //            tableView.reloadData()
         } catch {
             print("Fetch failed")
         }
@@ -84,13 +81,13 @@ class SearchViewController: UIViewController {
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            ])
+        ])
     }
     
     private func configureSubviews() {
         tableView.delegate = self
         tableView.dataSource = self
-//        tableView.separatorStyle = .none
+        //        tableView.separatorStyle = .none
         
         searchController.searchBar.delegate = self
         searchController.searchBar.clipsToBounds = true
@@ -134,10 +131,9 @@ extension SearchViewController: NSFetchedResultsControllerDelegate {
 extension SearchViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let searchText = searchBar.text else { return }
-        let searchResultsViewController = SearchResultsViewController()
+        let searchResultsViewController = NewsViewController()
         searchResultsViewController.searchText = searchText
         self.navigationController?.pushViewController(searchResultsViewController, animated: true)
-        print("Clicked")
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
@@ -150,7 +146,7 @@ extension SearchViewController: UISearchBarDelegate {
             let searchText = searchBar.text,
             !searchText.trimmingCharacters(in: .whitespaces).isEmpty
         else {
-            searchBar.setShowsCancelButton(false, animated: false)
+            searchBar.setShowsCancelButton(false, animated: true)
             return
         }
         
@@ -159,21 +155,19 @@ extension SearchViewController: UISearchBarDelegate {
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         searchController.searchBar.showsCancelButton = false
-//        navigationItem.searchController?.isActive = false
+        //        navigationItem.searchController?.isActive = false
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         guard let searchText = searchBar.text, searchText != "" else { return }
-        let searchResultsViewController = SearchResultsViewController()
+        let searchResultsViewController = NewsViewController()
         searchResultsViewController.searchText = searchText
         self.navigationController?.pushViewController(searchResultsViewController, animated: true)
-        print("Search")
     }
 }
 
 extension SearchViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        searchRequests.count
         let sectionInfo = fetchedResultsController.sections?[section]
         guard let numberOfRows = sectionInfo?.numberOfObjects else { return 0 }
         return numberOfRows
@@ -195,7 +189,10 @@ extension SearchViewController: UITableViewDelegate {
         searchController.searchBar.endEditing(true)
     }
     
-    func numberOfSections(in tableView: UITableView) -> Int {
-        1
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let searchText = fetchedResultsController.object(at: indexPath).value
+        let searchResultsViewController = NewsViewController()
+        searchResultsViewController.searchText = searchText
+        self.navigationController?.pushViewController(searchResultsViewController, animated: true)
     }
 }

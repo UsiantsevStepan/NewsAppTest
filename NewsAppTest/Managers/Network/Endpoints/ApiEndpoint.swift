@@ -31,9 +31,10 @@ extension ApiEndpoint: EndpointProtocol {
     
     var params: [String : String] {
         var queryParams = [
-//            "apiKey" : "0fa2296c3e0c4b03bcffabfc169fa429",
-            "apiKey" : "8c2922169e7a44ec9c42958aed00a3fa",
-            "language" : Locale.current.regionCode ?? "en",
+            "apiKey" : "0fa2296c3e0c4b03bcffabfc169fa429",
+//            "apiKey" : "8c2922169e7a44ec9c42958aed00a3fa",
+//            "language" : Locale.current.regionCode ?? "en",
+            "language" : "en",
             "sortBy" : "publishedAt"
         ]
         

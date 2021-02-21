@@ -1,5 +1,5 @@
 //
-//  SearchResultsViewController.swift
+//  NewsViewController.swift
 //  NewsAppTest
 //
 //  Created by Степан Усьянцев on 18.02.2021.
@@ -8,7 +8,7 @@
 import UIKit
 import CoreData
 
-class SearchResultsViewController: UIViewController {
+class NewsViewController: UIViewController {
     private let newsManager = NewsManager()
     private var totalResults = 0
     private var fetchedResultsController: NSFetchedResultsController<ArticlePreview>!
@@ -16,20 +16,24 @@ class SearchResultsViewController: UIViewController {
     private let footerView = FooterView()
     private var isLoading = false
     private var isPageAfterDB = false
+    private let newsView = NewsView()
     
-    let tableView = UITableView()
     var searchText = ""
     
     var news = [NewsPreviewCellModel]()
     
+    override func loadView() {
+        super.loadView()
+        
+        view = newsView
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tableView.register(NewsTableViewCell.self, forCellReuseIdentifier: NewsTableViewCell.reuseId)
-        
-        addSubviews()
-        setConstraints()
-        configureSubviews()
+        newsView.tableView.delegate = self
+        newsView.tableView.dataSource = self
+        newsView.tableView.tableFooterView = footerView
         
         loadPage(with: searchText)
     }
@@ -55,7 +59,7 @@ class SearchResultsViewController: UIViewController {
         
         do {
             try fetchedResultsController.performFetch()
-            tableView.reloadData()
+            //            newsView.tableView.reloadData()
         } catch {
             print("Fetch failed")
         }
@@ -90,51 +94,68 @@ class SearchResultsViewController: UIViewController {
         }
         
         newsManager.loadSerchedNews(searchText: searchText, date: date) { [weak self] result in
-                guard let self = self else { return }
-                
-                switch result {
-                case let .failure(error):
-                    print(error.localizedDescription)
-                    return
-                case .success:
-                    DispatchQueue.main.async {
-                        self.loadSavedData()
-                    }
+            guard let self = self else { return }
+            
+            switch result {
+            case let .failure(error):
+                print(error.localizedDescription)
+                return
+            case .success:
+                DispatchQueue.main.async {
+                    self.loadSavedData()
                 }
-                self.footerView.hideActivityIndicator()
-                self.isLoading = false
             }
-    }
-    
-    private func addSubviews() {
-        view.addSubview(tableView)
-    }
-    
-    private func setConstraints() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-        ])
-    }
-    
-    private func configureSubviews() {
-        tableView.tableFooterView = footerView
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 100
+            self.footerView.hideActivityIndicator()
+            self.isLoading = false
+        }
     }
 }
 
-extension SearchResultsViewController: NSFetchedResultsControllerDelegate {
+extension NewsViewController: NSFetchedResultsControllerDelegate {
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        newsView.tableView.beginUpdates()
+    }
     
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
+        switch type {
+        case .insert:
+            newsView.tableView.insertSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .automatic)
+        case .update:
+            newsView.tableView.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .automatic)
+        case .delete:
+            newsView.tableView.deleteSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .fade)
+        default:
+            print("Unknown case of didChange sectionInfo")
+        }
+    }
+    
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        switch type {
+        case .update:
+            guard let indexPath = indexPath else { return }
+            newsView.tableView.reloadRows(at: [indexPath], with: .fade)
+        case .insert:
+            guard let newIndexPath = newIndexPath else { return }
+            newsView.tableView.insertRows(at: [newIndexPath], with: .fade)
+        case .delete:
+            guard let indexPath = indexPath else { return }
+            newsView.tableView.deleteRows(at: [indexPath], with: .fade)
+        case .move:
+            guard let newIndexPath = newIndexPath, let indexPath = indexPath else { return }
+            newsView.tableView.deleteRows(at: [indexPath], with: .fade)
+            newsView.tableView.insertRows(at: [newIndexPath], with: .fade)
+        @unknown default:
+            print("Add new case to didChange anObject")
+        }
+    }
+    
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        newsView.tableView.endUpdates()
+    }
 }
 
-extension SearchResultsViewController: UITableViewDataSource {
+extension NewsViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let sectionInfo = fetchedResultsController.sections?[section]
         guard let numberOfRows = sectionInfo?.numberOfObjects else { return 0 }
@@ -143,9 +164,7 @@ extension SearchResultsViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: NewsTableViewCell.reuseId, for: indexPath) as! NewsTableViewCell
-        
         let article = fetchedResultsController.object(at: indexPath)
-        
         cell.configure(article: article)
         
         return cell
@@ -154,7 +173,7 @@ extension SearchResultsViewController: UITableViewDataSource {
     
 }
 
-extension SearchResultsViewController: UITableViewDelegate {
+extension NewsViewController: UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
         guard let fetchedResults = fetchedResultsController else { return 0 }
         guard let sections = fetchedResults.sections else { return 0 }
@@ -169,7 +188,7 @@ extension SearchResultsViewController: UITableViewDelegate {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         
-        if offsetY > 0, offsetY > contentHeight - scrollView.frame.height - 200 {
+        if offsetY > 0, offsetY > contentHeight - scrollView.frame.height - 100 {
             loadNextPage(with: searchText)
         }
     }

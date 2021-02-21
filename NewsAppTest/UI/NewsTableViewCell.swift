@@ -11,7 +11,7 @@ class NewsTableViewCell: UITableViewCell {
     static let reuseId = "NewsTableViewCellReuseId"
     
 //    private let newsImage = UIImageView()
-    private let newsImage = NewsImage()
+    private let newsImage = NewsImage(frame: .zero)
     private let titleLabel = UILabel()
     private let descriptionLabel = UILabel()
     
@@ -32,7 +32,9 @@ class NewsTableViewCell: UITableViewCell {
         
         titleLabel.text = nil
         descriptionLabel.text = nil
-        newsImage.image = #imageLiteral(resourceName: "placeholder")
+//        newsImage.image = #imageLiteral(resourceName: "placeholder")
+        newsImage.image = nil
+        newsImage.cancelTask()
     }
     
     private func addSubviews() {
@@ -52,6 +54,7 @@ class NewsTableViewCell: UITableViewCell {
             newsImage.leadingAnchor.constraint(equalTo: marginGuide.leadingAnchor),
             newsImage.heightAnchor.constraint(equalToConstant: 100),
             newsImage.widthAnchor.constraint(equalToConstant: 100),
+            newsImage.bottomAnchor.constraint(lessThanOrEqualTo: marginGuide.bottomAnchor),
 //            newsImage.leadingAnchor.constraint(equalTo: marginGuide.leadingAnchor, constant: 8),
 //            newsImage.trailingAnchor.constraint(equalTo: marginGuide.trailingAnchor, constant: -8),
 //            newsImage.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor, constant: -8),
@@ -71,6 +74,8 @@ class NewsTableViewCell: UITableViewCell {
         newsImage.clipsToBounds = true
         newsImage.contentMode = .scaleAspectFill
         newsImage.layer.cornerRadius = 8
+        newsImage.layer.borderWidth = 0.5
+        newsImage.layer.borderColor = UIColor.black.withAlphaComponent(0.5).cgColor
         
         titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
 //        titleLabel.textColor = .white
@@ -88,10 +93,10 @@ class NewsTableViewCell: UITableViewCell {
     func configure(article: ArticlePreview) {
         titleLabel.text = article.title
         descriptionLabel.text = article.articleDesription
-        guard let urlString = article.imagePath else { return }
+//        guard let urlString = article.imagePath else { return }
         
 //        print(urlString)
-        newsImage.downloadImage(urlString: urlString)
+        newsImage.setImage(from: article.imagePath)
     }
 }
 
