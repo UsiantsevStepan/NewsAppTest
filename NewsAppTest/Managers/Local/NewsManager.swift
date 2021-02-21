@@ -63,12 +63,37 @@ class NewsManager {
         }
     }
     
-    private func saveNews(text: String, news: [Article]) -> Void {
-        
+    public func saveSearchText(text: String) {
         // MARK: - Creating SearchText entity which will store news
         let searchText = SearchText(context: NewsManager.context)
         searchText.value = text
         searchText.dateForSorting = Date()
+        
+        // MARK: - Saving data to DB
+        do {
+            try NewsManager.context.save()
+        } catch let error as NSError {
+            print(error, error.localizedDescription)
+        }
+    }
+    
+    public func saveIsViewed(article: ArticlePreview) {
+        article.isViewed = true
+        
+        do {
+            try NewsManager.context.save()
+        } catch let error as NSError {
+            print(error, error.localizedDescription)
+        }
+    }
+    
+    private func saveNews(text: String, news: [Article]) -> Void {
+        // MARK: - Fetch SearchText entity which stores news
+        let request = SearchText.createFetchRequest() as NSFetchRequest<SearchText>
+        let predicate = NSPredicate(format: "value CONTAINS %@", text)
+        request.predicate = predicate
+        
+        guard let searchText = try? NewsManager.context.fetch(request).first else { return }
         
         // MARK: - Creating an article object
         for article in news {

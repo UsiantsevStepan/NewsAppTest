@@ -25,7 +25,8 @@ class SearchViewController: UIViewController {
         fetchedResultsManager = FetchedResultsManager(
             delegate: self,
             predicate: nil,
-            sortDescriptors: [NSSortDescriptor(key: "dateForSorting", ascending: false)]
+            sortDescriptors: [NSSortDescriptor(key: "dateForSorting", ascending: false)],
+            sectionNameKeyPath: nil
         )
         
         addSubviews()
@@ -112,6 +113,7 @@ extension SearchViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let searchText = searchBar.text else { return }
         let searchResultsViewController = NewsViewController()
+        newsManager.saveSearchText(text: searchText)
         searchResultsViewController.searchText = searchText
         self.navigationController?.pushViewController(searchResultsViewController, animated: true)
     }
@@ -141,6 +143,7 @@ extension SearchViewController: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         guard let searchText = searchBar.text, searchText != "" else { return }
         let searchResultsViewController = NewsViewController()
+        newsManager.saveSearchText(text: searchText)
         searchResultsViewController.searchText = searchText
         self.navigationController?.pushViewController(searchResultsViewController, animated: true)
     }
@@ -170,6 +173,7 @@ extension SearchViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let searchText = fetchedResultsManager?.fetchedResultsController.object(at: indexPath).value else { return }
         let searchResultsViewController = NewsViewController()
+        newsManager.saveSearchText(text: searchText)
         searchResultsViewController.searchText = searchText
         self.navigationController?.pushViewController(searchResultsViewController, animated: true)
     }

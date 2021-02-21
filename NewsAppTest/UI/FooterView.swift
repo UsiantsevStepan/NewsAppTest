@@ -26,9 +26,9 @@ class FooterView: UIView {
         pageActivityIndicator.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            pageActivityIndicator.topAnchor.constraint(equalTo: topAnchor, constant: 4),
-            pageActivityIndicator.centerXAnchor.constraint(equalTo: centerXAnchor),
-            pageActivityIndicator.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4)
+            pageActivityIndicator.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor, constant: 4),
+            pageActivityIndicator.centerXAnchor.constraint(equalTo: layoutMarginsGuide.centerXAnchor),
+            pageActivityIndicator.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor, constant: -4)
         ])
         
         pageActivityIndicator.style = .medium

@@ -74,7 +74,7 @@ class NewsImage: UIImageView {
             return
         }
         
-        let task = URLSession.shared.dataTask(with: url) { [weak self] (data, _, error) in
+        task = URLSession.shared.dataTask(with: url) { [weak self] (data, _, error) in
             guard let self = self else { return }
             guard error == nil, let data = data, let image = UIImage(data: data) else {
                 self.dropImage()
@@ -93,8 +93,8 @@ class NewsImage: UIImageView {
 //            NewsImage.imageCache.setObject(image, forKey: urlString as NSString)
             
         }
-        task.resume()
-        self.task = task
+        task?.resume()
+//        self.task = task
     }
     
     //    func setImage(urlString: String) {

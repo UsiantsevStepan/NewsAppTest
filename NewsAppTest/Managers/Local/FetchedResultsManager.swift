@@ -11,7 +11,12 @@ import CoreData
 class FetchedResultsManager<T: NSManagedObject>: NSObject, NSFetchedResultsControllerDelegate {
     let fetchedResultsController: NSFetchedResultsController<T>
     
-    init(delegate: NSFetchedResultsControllerDelegate, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor] = []) {
+    init(
+        delegate: NSFetchedResultsControllerDelegate,
+        predicate: NSPredicate?,
+        sortDescriptors: [NSSortDescriptor] = [],
+        sectionNameKeyPath: String?
+    ) {
         let request = NSFetchRequest<T>(entityName: String(describing: T.self))
         request.predicate = predicate
         request.sortDescriptors = sortDescriptors
@@ -19,7 +24,7 @@ class FetchedResultsManager<T: NSManagedObject>: NSObject, NSFetchedResultsContr
         fetchedResultsController = NSFetchedResultsController(
             fetchRequest: request,
             managedObjectContext: NewsManager.context,
-            sectionNameKeyPath: nil,
+            sectionNameKeyPath: sectionNameKeyPath,
             cacheName: nil
         )
         

@@ -28,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let container = NSPersistentContainer(name: "NewsAppTest")
         //MARK: - Print sqlite file's path
         print(container.persistentStoreDescriptions.first?.url)
-        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        container.viewContext.mergePolicy = NSMergeByPropertyStoreTrumpMergePolicy
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")

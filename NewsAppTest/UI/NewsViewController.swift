@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import SafariServices
 
 class NewsViewController: UIViewController {
     private let newsManager = NewsManager()
@@ -27,23 +28,26 @@ class NewsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        navigationItem.title = searchText
+        
         newsView.tableView.delegate = self
         newsView.tableView.dataSource = self
         newsView.tableView.tableFooterView = footerView
         fetchedResultsManager = FetchedResultsManager(
             delegate: self,
             predicate: NSPredicate(format: "searchText.value CONTAINS %@", searchText),
-            sortDescriptors: [NSSortDescriptor(key: "dateForSorting", ascending: false)]
+            sortDescriptors: [NSSortDescriptor(key: "dateForSorting", ascending: false)],
+            sectionNameKeyPath: "publishDate"
         )
         
         loadPage(with: Date())
     }
     
     private func loadPage(with date: Date) {
-        if isLoading { return }
         isLoading = true
         footerView.showActivityIndicator()
         
+        print("StartDate: \(date)")
         newsManager.loadSerchedNews(searchText: searchText, date: date) { [weak self] result in
             guard let self = self else { return }
             
@@ -56,6 +60,7 @@ class NewsViewController: UIViewController {
             }
             self.footerView.hideActivityIndicator()
             self.isLoading = false
+            print("Date: \(String(describing: self.fetchedResultsManager?.fetchedResultsController.fetchedObjects?.last?.dateForSorting))")
         }
     }
 }
@@ -68,9 +73,9 @@ extension NewsViewController: NSFetchedResultsControllerDelegate {
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
         switch type {
         case .insert:
-            newsView.tableView.insertSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .automatic)
+            newsView.tableView.insertSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .fade)
         case .update:
-            newsView.tableView.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .automatic)
+            newsView.tableView.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .fade)
         case .delete:
             newsView.tableView.deleteSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .fade)
         default:
@@ -122,13 +127,10 @@ extension NewsViewController: UITableViewDataSource {
 
 extension NewsViewController: UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        guard let fetchedResults = fetchedResultsManager?.fetchedResultsController else { return 0 }
-        guard let sections = fetchedResults.sections else { return 0 }
-        return sections.count
+        fetchedResultsManager?.fetchedResultsController.sections?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        print("section: \(fetchedResultsManager?.fetchedResultsController.sections?[section].name)")
         return fetchedResultsManager?.fetchedResultsController.sections?[section].name
     }
     
@@ -137,9 +139,25 @@ extension NewsViewController: UITableViewDelegate {
         let contentHeight = scrollView.contentSize.height
         
         if offsetY > 0, offsetY > contentHeight - scrollView.frame.height - 100 {
+            if isLoading { return }
             guard let date = fetchedResultsManager?.fetchedResultsController.fetchedObjects?.last?.dateForSorting else { return }
             loadPage(with: date)
         }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        newsView.tableView.deselectRow(at: indexPath, animated: true)
+        
+        guard
+            let urlString = fetchedResultsManager?.fetchedResultsController.object(at: indexPath).articlePath,
+            let url = URL(string: urlString)
+        else { return }
+        
+        guard let article = fetchedResultsManager?.fetchedResultsController.object(at: indexPath) else { return }
+        newsManager.saveIsViewed(article: article)
+        
+        let safariViewController = SFSafariViewController(url: url)
+        present(safariViewController, animated: true, completion: nil)
     }
 }
 

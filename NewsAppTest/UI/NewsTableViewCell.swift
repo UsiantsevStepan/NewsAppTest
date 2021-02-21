@@ -32,8 +32,10 @@ class NewsTableViewCell: UITableViewCell {
         
         titleLabel.text = nil
         descriptionLabel.text = nil
-//        newsImage.image = #imageLiteral(resourceName: "placeholder")
         newsImage.image = nil
+        titleLabel.alpha = 1
+        descriptionLabel.alpha = 1
+        newsImage.alpha = 1
         newsImage.cancelTask()
     }
     
@@ -55,9 +57,6 @@ class NewsTableViewCell: UITableViewCell {
             newsImage.heightAnchor.constraint(equalToConstant: 100),
             newsImage.widthAnchor.constraint(equalToConstant: 100),
             newsImage.bottomAnchor.constraint(lessThanOrEqualTo: marginGuide.bottomAnchor),
-//            newsImage.leadingAnchor.constraint(equalTo: marginGuide.leadingAnchor, constant: 8),
-//            newsImage.trailingAnchor.constraint(equalTo: marginGuide.trailingAnchor, constant: -8),
-//            newsImage.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor, constant: -8),
             
             titleLabel.topAnchor.constraint(equalTo: marginGuide.topAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: newsImage.trailingAnchor, constant: 4),
@@ -78,16 +77,11 @@ class NewsTableViewCell: UITableViewCell {
         newsImage.layer.borderColor = UIColor.black.withAlphaComponent(0.5).cgColor
         
         titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
-//        titleLabel.textColor = .white
-        titleLabel.text = "News"
         titleLabel.numberOfLines = 0
         titleLabel.lineBreakMode = .byWordWrapping
         
-//        descriptionLabel.textColor = .white
-        descriptionLabel.text = "EOQRPEPQR oepqpropqe oeqrp eqorp eqor qper opqe"
-        descriptionLabel.numberOfLines = 0
-        descriptionLabel.lineBreakMode = .byWordWrapping
-//        tableView.separatorStyle = .none
+        descriptionLabel.numberOfLines = 3
+        descriptionLabel.lineBreakMode = .byTruncatingTail
     }
     
     func configure(article: ArticlePreview) {
@@ -97,6 +91,12 @@ class NewsTableViewCell: UITableViewCell {
         
 //        print(urlString)
         newsImage.setImage(from: article.imagePath)
+        
+        if article.isViewed {
+            titleLabel.alpha = 0.5
+            descriptionLabel.alpha = 0.5
+            newsImage.alpha = 0.5
+        }
     }
 }
 
