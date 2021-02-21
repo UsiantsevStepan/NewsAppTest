@@ -11,7 +11,7 @@ import CoreData
 class NewsViewController: UIViewController {
     private let newsManager = NewsManager()
     private var totalResults = 0
-    private var fetchedResultsController: NSFetchedResultsController<ArticlePreview>!
+    private var fetchedResultsManager: FetchedResultsManager<ArticlePreview>?
     private var container = (UIApplication.shared.delegate as! AppDelegate).persistentContainer
     private let footerView = FooterView()
     private var isLoading = false
@@ -20,11 +20,7 @@ class NewsViewController: UIViewController {
     
     var searchText = ""
     
-    var news = [NewsPreviewCellModel]()
-    
     override func loadView() {
-        super.loadView()
-        
         view = newsView
     }
     
@@ -34,64 +30,19 @@ class NewsViewController: UIViewController {
         newsView.tableView.delegate = self
         newsView.tableView.dataSource = self
         newsView.tableView.tableFooterView = footerView
+        fetchedResultsManager = FetchedResultsManager(
+            delegate: self,
+            predicate: NSPredicate(format: "searchText.value CONTAINS %@", searchText),
+            sortDescriptors: [NSSortDescriptor(key: "dateForSorting", ascending: false)]
+        )
         
-        loadPage(with: searchText)
+        loadPage(with: Date())
     }
     
-    func loadSavedData() {
-        if fetchedResultsController == nil {
-            let request = ArticlePreview.createFetchRequest()
-            let sort = NSSortDescriptor(key: "dateForSorting", ascending: false)
-            request.sortDescriptors = [sort]
-            request.fetchBatchSize = 20
-            let predicate = NSPredicate(format: "searchText.value CONTAINS %@", searchText)
-            request.predicate = predicate
-            
-            fetchedResultsController = NSFetchedResultsController(
-                fetchRequest: request,
-                managedObjectContext: container.viewContext,
-                //                sectionNameKeyPath: "searchText.searchText",
-                sectionNameKeyPath: "publishDate",
-                cacheName: nil
-            )
-            fetchedResultsController.delegate = self
-        }
-        
-        do {
-            try fetchedResultsController.performFetch()
-            //            newsView.tableView.reloadData()
-        } catch {
-            print("Fetch failed")
-        }
-    }
-    
-    private func loadPage(with searchText: String) {
-        newsManager.loadSerchedNews(searchText: searchText, date: Date()) { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case let .failure(error):
-                print(error.localizedDescription)
-                return
-            case let .success(data):
-                self.totalResults = data
-            }
-            DispatchQueue.main.async {
-                self.loadSavedData()
-            }
-        }
-    }
-    
-    private func loadNextPage(with searchText: String) {
+    private func loadPage(with date: Date) {
         if isLoading { return }
         isLoading = true
         footerView.showActivityIndicator()
-        
-        guard let date = fetchedResultsController.fetchedObjects?.last?.dateForSorting else {
-            isLoading = false
-            footerView.hideActivityIndicator()
-            return
-        }
         
         newsManager.loadSerchedNews(searchText: searchText, date: date) { [weak self] result in
             guard let self = self else { return }
@@ -100,10 +51,8 @@ class NewsViewController: UIViewController {
             case let .failure(error):
                 print(error.localizedDescription)
                 return
-            case .success:
-                DispatchQueue.main.async {
-                    self.loadSavedData()
-                }
+            case let .success(data):
+                self.totalResults = data
             }
             self.footerView.hideActivityIndicator()
             self.isLoading = false
@@ -157,14 +106,12 @@ extension NewsViewController: NSFetchedResultsControllerDelegate {
 
 extension NewsViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let sectionInfo = fetchedResultsController.sections?[section]
-        guard let numberOfRows = sectionInfo?.numberOfObjects else { return 0 }
-        return numberOfRows
+        fetchedResultsManager?.fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: NewsTableViewCell.reuseId, for: indexPath) as! NewsTableViewCell
-        let article = fetchedResultsController.object(at: indexPath)
+        guard let article = fetchedResultsManager?.fetchedResultsController.object(at: indexPath) else { return cell }
         cell.configure(article: article)
         
         return cell
@@ -175,13 +122,14 @@ extension NewsViewController: UITableViewDataSource {
 
 extension NewsViewController: UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        guard let fetchedResults = fetchedResultsController else { return 0 }
+        guard let fetchedResults = fetchedResultsManager?.fetchedResultsController else { return 0 }
         guard let sections = fetchedResults.sections else { return 0 }
         return sections.count
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return fetchedResultsController.sections?[section].name
+        print("section: \(fetchedResultsManager?.fetchedResultsController.sections?[section].name)")
+        return fetchedResultsManager?.fetchedResultsController.sections?[section].name
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -189,7 +137,8 @@ extension NewsViewController: UITableViewDelegate {
         let contentHeight = scrollView.contentSize.height
         
         if offsetY > 0, offsetY > contentHeight - scrollView.frame.height - 100 {
-            loadNextPage(with: searchText)
+            guard let date = fetchedResultsManager?.fetchedResultsController.fetchedObjects?.last?.dateForSorting else { return }
+            loadPage(with: date)
         }
     }
 }

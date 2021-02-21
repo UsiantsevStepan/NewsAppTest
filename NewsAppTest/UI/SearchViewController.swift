@@ -12,7 +12,7 @@ class SearchViewController: UIViewController {
     private let searchController = UISearchController(searchResultsController: nil)
     private let tableView = UITableView()
     private let newsManager = NewsManager()
-    private var fetchedResultsController: NSFetchedResultsController<SearchText>!
+    private var fetchedResultsManager: FetchedResultsManager<SearchText>?
     private var container = (UIApplication.shared.delegate as! AppDelegate).persistentContainer
     
     override func viewDidLoad() {
@@ -22,7 +22,11 @@ class SearchViewController: UIViewController {
         view.backgroundColor = .white
         navigationItem.searchController = searchController
         
-        loadSavedData()
+        fetchedResultsManager = FetchedResultsManager(
+            delegate: self,
+            predicate: nil,
+            sortDescriptors: [NSSortDescriptor(key: "dateForSorting", ascending: false)]
+        )
         
         addSubviews()
         setConstraints()
@@ -46,29 +50,6 @@ class SearchViewController: UIViewController {
         print("touch")
     }
     
-    private func loadSavedData() {
-        if fetchedResultsController == nil {
-            let request = SearchText.createFetchRequest()
-            let sort = NSSortDescriptor(key: "dateForSorting", ascending: false)
-            request.sortDescriptors = [sort]
-            
-            fetchedResultsController = NSFetchedResultsController(
-                fetchRequest: request,
-                managedObjectContext: container.viewContext,
-                sectionNameKeyPath: nil,
-                cacheName: nil
-            )
-            fetchedResultsController.delegate = self
-        }
-        
-        do {
-            try fetchedResultsController.performFetch()
-            //            tableView.reloadData()
-        } catch {
-            print("Fetch failed")
-        }
-    }
-    
     private func addSubviews() {
         view.addSubview(tableView)
     }
@@ -87,7 +68,6 @@ class SearchViewController: UIViewController {
     private func configureSubviews() {
         tableView.delegate = self
         tableView.dataSource = self
-        //        tableView.separatorStyle = .none
         
         searchController.searchBar.delegate = self
         searchController.searchBar.clipsToBounds = true
@@ -168,15 +148,13 @@ extension SearchViewController: UISearchBarDelegate {
 
 extension SearchViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let sectionInfo = fetchedResultsController.sections?[section]
-        guard let numberOfRows = sectionInfo?.numberOfObjects else { return 0 }
-        return numberOfRows
+        fetchedResultsManager?.fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "Cell")
         
-        let searchRequest = fetchedResultsController.object(at: indexPath)
+        guard let searchRequest = fetchedResultsManager?.fetchedResultsController.object(at: indexPath) else { return cell }
         cell.textLabel?.textAlignment = .center
         cell.textLabel?.text = searchRequest.value
         
@@ -190,7 +168,7 @@ extension SearchViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let searchText = fetchedResultsController.object(at: indexPath).value
+        guard let searchText = fetchedResultsManager?.fetchedResultsController.object(at: indexPath).value else { return }
         let searchResultsViewController = NewsViewController()
         searchResultsViewController.searchText = searchText
         self.navigationController?.pushViewController(searchResultsViewController, animated: true)

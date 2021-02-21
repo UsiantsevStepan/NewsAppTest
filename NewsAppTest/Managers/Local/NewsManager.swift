@@ -23,7 +23,7 @@ class NewsManager {
     private var searchData = [(String, [Article])]()
     
     //MARK: - Reference to manged object context
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    static let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let persistentStoreCoordinator = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.persistentStoreCoordinator
     
     public func loadSerchedNews(searchText: String, date: Date, completion: @escaping ((Result<Int, Error>)) -> Void) {
@@ -66,13 +66,13 @@ class NewsManager {
     private func saveNews(text: String, news: [Article]) -> Void {
         
         // MARK: - Creating SearchText entity which will store news
-        let searchText = SearchText(context: context)
+        let searchText = SearchText(context: NewsManager.context)
         searchText.value = text
         searchText.dateForSorting = Date()
         
         // MARK: - Creating an article object
         for article in news {
-            let newArticle = ArticlePreview(context: context)
+            let newArticle = ArticlePreview(context: NewsManager.context)
             
             newArticle.title = article.title
             newArticle.articleDesription = article.description
@@ -88,7 +88,7 @@ class NewsManager {
         
         // MARK: - Saving data to DB
         do {
-            try context.save()
+            try NewsManager.context.save()
         } catch let error as NSError {
             print(error, error.localizedDescription)
         }
