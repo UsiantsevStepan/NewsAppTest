@@ -23,7 +23,7 @@ class FetchedResultsManager<T: NSManagedObject>: NSObject, NSFetchedResultsContr
         
         fetchedResultsController = NSFetchedResultsController(
             fetchRequest: request,
-            managedObjectContext: NewsManager.context,
+            managedObjectContext: CoreDataStack.instance.context,
             sectionNameKeyPath: sectionNameKeyPath,
             cacheName: nil
         )

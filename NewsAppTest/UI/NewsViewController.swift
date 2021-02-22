@@ -13,7 +13,7 @@ class NewsViewController: UIViewController {
     private let newsManager = NewsManager()
     private var totalResults = 0
     private var fetchedResultsManager: FetchedResultsManager<ArticlePreview>?
-    private var container = (UIApplication.shared.delegate as! AppDelegate).persistentContainer
+//    private var container = (UIApplication.shared.delegate as! AppDelegate).persistentContainer
     private let footerView = FooterView()
     private var isLoading = false
     private var isPageAfterDB = false
@@ -73,11 +73,11 @@ extension NewsViewController: NSFetchedResultsControllerDelegate {
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
         switch type {
         case .insert:
-            newsView.tableView.insertSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .fade)
+            newsView.tableView.insertSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
         case .update:
-            newsView.tableView.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .fade)
+            newsView.tableView.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
         case .delete:
-            newsView.tableView.deleteSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .fade)
+            newsView.tableView.deleteSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
         default:
             print("Unknown case of didChange sectionInfo")
         }
@@ -87,17 +87,17 @@ extension NewsViewController: NSFetchedResultsControllerDelegate {
         switch type {
         case .update:
             guard let indexPath = indexPath else { return }
-            newsView.tableView.reloadRows(at: [indexPath], with: .fade)
+            newsView.tableView.reloadRows(at: [indexPath], with: .none)
         case .insert:
             guard let newIndexPath = newIndexPath else { return }
-            newsView.tableView.insertRows(at: [newIndexPath], with: .fade)
+            newsView.tableView.insertRows(at: [newIndexPath], with: .none)
         case .delete:
             guard let indexPath = indexPath else { return }
-            newsView.tableView.deleteRows(at: [indexPath], with: .fade)
+            newsView.tableView.deleteRows(at: [indexPath], with: .none)
         case .move:
             guard let newIndexPath = newIndexPath, let indexPath = indexPath else { return }
-            newsView.tableView.deleteRows(at: [indexPath], with: .fade)
-            newsView.tableView.insertRows(at: [newIndexPath], with: .fade)
+            newsView.tableView.deleteRows(at: [indexPath], with: .none)
+            newsView.tableView.insertRows(at: [newIndexPath], with: .none)
         @unknown default:
             print("Add new case to didChange anObject")
         }

@@ -23,8 +23,9 @@ class NewsManager {
     private var searchData = [(String, [Article])]()
     
     //MARK: - Reference to manged object context
-    static let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    let persistentStoreCoordinator = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.persistentStoreCoordinator
+//    static let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    let context = CoreDataStack.instance.childMoc
+//    let persistentStoreCoordinator = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.persistentStoreCoordinator
     
     public func loadSerchedNews(searchText: String, date: Date, completion: @escaping ((Result<Int, Error>)) -> Void) {
         let group = DispatchGroup()
@@ -69,31 +70,27 @@ class NewsManager {
         let predicate = NSPredicate(format: "value == %@", text)
         request.predicate = predicate
         
-        if let searchText = try? NewsManager.context.fetch(request).first {
+        if let searchText = try? context.fetch(request).first {
             searchText.dateForSorting = Date()
         } else {
             // MARK: - Creating SearchText entity which will store news
-            let searchText = SearchText(context: NewsManager.context)
+            let searchText = SearchText(context: context)
             searchText.value = text
             searchText.dateForSorting = Date()
         }
         
         
         // MARK: - Saving data to DB
-        do {
-            try NewsManager.context.save()
-        } catch let error as NSError {
-            print(error, error.localizedDescription)
-        }
+            context.saveContext() {
+                CoreDataStack.instance.context.saveContext()
+            }
     }
     
     public func saveIsViewed(article: ArticlePreview) {
         article.isViewed = true
         
-        do {
-            try NewsManager.context.save()
-        } catch let error as NSError {
-            print(error, error.localizedDescription)
+        context.saveContext() {
+            CoreDataStack.instance.context.saveContext()
         }
     }
     
@@ -103,11 +100,11 @@ class NewsManager {
         let predicate = NSPredicate(format: "value == %@", text)
         request.predicate = predicate
         
-        guard let searchText = try? NewsManager.context.fetch(request).first else { return }
+        guard let searchText = try? context.fetch(request).first else { return }
         
         // MARK: - Creating an article object
         for article in news {
-            let newArticle = ArticlePreview(context: NewsManager.context)
+            let newArticle = ArticlePreview(context: context)
             
             newArticle.title = article.title
             newArticle.articleDesription = article.description
@@ -122,10 +119,8 @@ class NewsManager {
         }
         
         // MARK: - Saving data to DB
-        do {
-            try NewsManager.context.save()
-        } catch let error as NSError {
-            print(error, error.localizedDescription)
+        context.saveContext() {
+            CoreDataStack.instance.context.saveContext()
         }
     }
 }
