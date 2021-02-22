@@ -52,6 +52,7 @@ class NewsManager {
                 }
             }
         }
+        
         group.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             
@@ -94,7 +95,7 @@ class NewsManager {
         }
     }
     
-    private func saveNews(text: String, news: [Article]) -> Void {
+    private func saveNews(text: String, news: [Article]) {
         // MARK: - Fetch SearchText entity which stores news
         let request = SearchText.createFetchRequest() as NSFetchRequest<SearchText>
         let predicate = NSPredicate(format: "value == %@", text)
@@ -106,6 +107,15 @@ class NewsManager {
         for article in news {
             let newArticle = ArticlePreview(context: context)
             
+            // MARK: - Fetch existing news
+            let request = ArticlePreview.createFetchRequest() as NSFetchRequest<ArticlePreview>
+            let predicate = NSPredicate(format: "id == %@", (article.title ?? "") + (article.description ?? ""))
+            request.predicate = predicate
+
+            if (try? context.fetch(request).first) != nil {
+                continue
+            } else {
+            
             newArticle.title = article.title
             newArticle.articleDesription = article.description
             newArticle.id = (article.title ?? "") + (article.description ?? "")
@@ -114,8 +124,8 @@ class NewsManager {
             newArticle.publishDate = dateFormat(with: article.publishedAt)
             newArticle.dateForSorting = article.publishedAt
             newArticle.isViewed = false
-            
-            searchText.addToNews(newArticle)
+            newArticle.searchKeyword = searchText.value
+            }
         }
         
         // MARK: - Saving data to DB

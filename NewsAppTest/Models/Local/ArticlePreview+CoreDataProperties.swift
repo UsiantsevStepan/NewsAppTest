@@ -2,7 +2,7 @@
 //  ArticlePreview+CoreDataProperties.swift
 //  NewsAppTest
 //
-//  Created by Степан Усьянцев on 20.02.2021.
+//  Created by Степан Усьянцев on 22.02.2021.
 //
 //
 
@@ -17,31 +17,14 @@ extension ArticlePreview {
     }
 
     @NSManaged public var articleDesription: String?
-    @NSManaged public var articlePath: String
-    @NSManaged public var dateForSorting: Date
-    @NSManaged public var id: String
+    @NSManaged public var articlePath: String?
+    @NSManaged public var dateForSorting: Date?
+    @NSManaged public var id: String?
     @NSManaged public var imagePath: String?
     @NSManaged public var isViewed: Bool
-    @NSManaged public var publishDate: String
+    @NSManaged public var publishDate: String?
     @NSManaged public var title: String?
-    @NSManaged public var searchText: NSSet?
-
-}
-
-// MARK: Generated accessors for searchText
-extension ArticlePreview {
-
-    @objc(addSearchTextObject:)
-    @NSManaged public func addToSearchText(_ value: SearchText)
-
-    @objc(removeSearchTextObject:)
-    @NSManaged public func removeFromSearchText(_ value: SearchText)
-
-    @objc(addSearchText:)
-    @NSManaged public func addToSearchText(_ values: NSSet)
-
-    @objc(removeSearchText:)
-    @NSManaged public func removeFromSearchText(_ values: NSSet)
+    @NSManaged public var searchKeyword: String?
 
 }
 

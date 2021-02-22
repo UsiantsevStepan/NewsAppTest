@@ -8,12 +8,12 @@
 import UIKit
 
 class NewsView: UIView {
-    let tableView = UITableView()
+    static let tableView = UITableView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        tableView.register(NewsTableViewCell.self, forCellReuseIdentifier: NewsTableViewCell.reuseId)
+        NewsView.tableView.register(NewsTableViewCell.self, forCellReuseIdentifier: NewsTableViewCell.reuseId)
         
         addSubviews()
         setConstraints()
@@ -25,25 +25,23 @@ class NewsView: UIView {
     }
     
         private func addSubviews() {
-            addSubview(tableView)
+            addSubview(NewsView.tableView)
         }
     
         private func setConstraints() {
-            tableView.translatesAutoresizingMaskIntoConstraints = false
+            NewsView.tableView.translatesAutoresizingMaskIntoConstraints = false
     
             NSLayoutConstraint.activate([
-                tableView.topAnchor.constraint(equalTo: topAnchor),
-                tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
-                tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
-                tableView.bottomAnchor.constraint(equalTo: bottomAnchor)
+                NewsView.tableView.topAnchor.constraint(equalTo: topAnchor),
+                NewsView.tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
+                NewsView.tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
+                NewsView.tableView.bottomAnchor.constraint(equalTo: bottomAnchor)
             ])
         }
     
         private func configureSubviews() {
-            tableView.rowHeight = UITableView.automaticDimension
-            tableView.estimatedRowHeight = 1000
-//            tableView.estimatedRowHeight = UITableView.automaticDimension
-//            tableView.estimatedRowHeight = 1000
+            NewsView.tableView.rowHeight = 120
+            NewsView.tableView.estimatedRowHeight = 120
         }
 }
 

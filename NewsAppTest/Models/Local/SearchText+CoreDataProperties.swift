@@ -2,7 +2,7 @@
 //  SearchText+CoreDataProperties.swift
 //  NewsAppTest
 //
-//  Created by Степан Усьянцев on 20.02.2021.
+//  Created by Степан Усьянцев on 22.02.2021.
 //
 //
 
@@ -16,27 +16,15 @@ extension SearchText {
         return NSFetchRequest<SearchText>(entityName: "SearchText")
     }
 
-    @NSManaged public var dateForSorting: Date
-    @NSManaged public var value: String
-    @NSManaged public var news: NSSet?
+    @NSManaged public var dateForSorting: Date?
+    @NSManaged public var value: String?
 
-}
-
-// MARK: Generated accessors for news
-extension SearchText {
-
-    @objc(addNewsObject:)
-    @NSManaged public func addToNews(_ value: ArticlePreview)
-
-    @objc(removeNewsObject:)
-    @NSManaged public func removeFromNews(_ value: ArticlePreview)
-
-    @objc(addNews:)
-    @NSManaged public func addToNews(_ values: NSSet)
-
-    @objc(removeNews:)
-    @NSManaged public func removeFromNews(_ values: NSSet)
-
+//    class func saveSearchKeyword(keyword: String, context: NSManagedObjectContext) {
+//        let searchText = SearchText(context: context)
+//        
+//        searchText.value = keyword
+//        searchText.dateForSorting = Date()
+//    }
 }
 
 extension SearchText : Identifiable {

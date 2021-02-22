@@ -2,14 +2,14 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17709" systemVersion="20C69" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="ArticlePreview" representedClassName="ArticlePreview" syncable="YES">
         <attribute name="articleDesription" optional="YES" attributeType="String"/>
-        <attribute name="articlePath" attributeType="String"/>
-        <attribute name="dateForSorting" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="id" attributeType="String"/>
+        <attribute name="articlePath" optional="YES" attributeType="String"/>
+        <attribute name="dateForSorting" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="imagePath" optional="YES" attributeType="String"/>
-        <attribute name="isViewed" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="publishDate" attributeType="String"/>
+        <attribute name="isViewed" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="publishDate" optional="YES" attributeType="String"/>
+        <attribute name="searchKeyword" optional="YES" attributeType="String"/>
         <attribute name="title" optional="YES" attributeType="String"/>
-        <relationship name="searchText" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SearchText" inverseName="news" inverseEntity="SearchText"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="id"/>
@@ -17,9 +17,8 @@
         </uniquenessConstraints>
     </entity>
     <entity name="SearchText" representedClassName="SearchText" syncable="YES">
-        <attribute name="dateForSorting" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="value" attributeType="String"/>
-        <relationship name="news" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ArticlePreview" inverseName="searchText" inverseEntity="ArticlePreview"/>
+        <attribute name="dateForSorting" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="value" optional="YES" attributeType="String"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="value"/>
@@ -28,6 +27,6 @@
     </entity>
     <elements>
         <element name="ArticlePreview" positionX="-36" positionY="9" width="128" height="164"/>
-        <element name="SearchText" positionX="-54" positionY="-9" width="128" height="74"/>
+        <element name="SearchText" positionX="-54" positionY="-9" width="128" height="59"/>
     </elements>
 </model>

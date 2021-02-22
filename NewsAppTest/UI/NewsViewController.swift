@@ -29,12 +29,12 @@ class NewsViewController: UIViewController {
         
         navigationItem.title = searchText
         
-        newsView.tableView.delegate = self
-        newsView.tableView.dataSource = self
-        newsView.tableView.tableFooterView = footerView
+        NewsView.tableView.delegate = self
+        NewsView.tableView.dataSource = self
+        NewsView.tableView.tableFooterView = footerView
         fetchedResultsManager = FetchedResultsManager(
             delegate: self,
-            predicate: NSPredicate(format: "searchText.value CONTAINS %@", searchText),
+            predicate: NSPredicate(format: "searchKeyword == %@", searchText),
             sortDescriptors: [NSSortDescriptor(key: "dateForSorting", ascending: false)],
             sectionNameKeyPath: "publishDate"
         )
@@ -60,23 +60,24 @@ class NewsViewController: UIViewController {
             self.footerView.hideActivityIndicator()
             self.isLoading = false
             print("Date: \(String(describing: self.fetchedResultsManager?.fetchedResultsController.fetchedObjects?.last?.dateForSorting))")
+            print("FetchedObjects: \(self.fetchedResultsManager?.fetchedResultsController.fetchedObjects?.count)")
         }
     }
 }
 
 extension NewsViewController: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        newsView.tableView.beginUpdates()
+        NewsView.tableView.beginUpdates()
     }
     
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
         switch type {
         case .insert:
-            newsView.tableView.insertSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
+            NewsView.tableView.insertSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
         case .update:
-            newsView.tableView.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
+            NewsView.tableView.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
         case .delete:
-            newsView.tableView.deleteSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
+            NewsView.tableView.deleteSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
         default:
             print("Unknown case of didChange sectionInfo")
         }
@@ -86,25 +87,21 @@ extension NewsViewController: NSFetchedResultsControllerDelegate {
         switch type {
         case .update:
             guard let indexPath = indexPath else { return }
-            newsView.tableView.reloadRows(at: [indexPath], with: .none)
+            NewsView.tableView.reloadRows(at: [indexPath], with: .none)
         case .insert:
             guard let newIndexPath = newIndexPath else { return }
-            newsView.tableView.insertRows(at: [newIndexPath], with: .none)
+            NewsView.tableView.insertRows(at: [newIndexPath], with: .none)
         case .delete:
             guard let indexPath = indexPath else { return }
-            newsView.tableView.deleteRows(at: [indexPath], with: .none)
-        case .move:
-            guard let newIndexPath = newIndexPath, let indexPath = indexPath else { return }
-            newsView.tableView.deleteRows(at: [indexPath], with: .none)
-            newsView.tableView.insertRows(at: [newIndexPath], with: .none)
-        @unknown default:
+            NewsView.tableView.deleteRows(at: [indexPath], with: .none)
+        default:
             print("Add new case to didChange anObject")
         }
     }
     
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        newsView.tableView.endUpdates()
+        NewsView.tableView.endUpdates()
     }
 }
 
@@ -145,7 +142,7 @@ extension NewsViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        newsView.tableView.deselectRow(at: indexPath, animated: true)
+        NewsView.tableView.deselectRow(at: indexPath, animated: true)
         
         guard
             let urlString = fetchedResultsManager?.fetchedResultsController.object(at: indexPath).articlePath,
@@ -158,9 +155,5 @@ extension NewsViewController: UITableViewDelegate {
         let safariViewController = SFSafariViewController(url: url)
         present(safariViewController, animated: true, completion: nil)
     }
-    
-//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//        200
-//    }
 }
 
