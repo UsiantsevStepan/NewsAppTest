@@ -9,6 +9,7 @@ import UIKit
 
 final class NewsView: UIView {
     let tableView = UITableView()
+    let footerView = FooterView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 30))
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -42,6 +43,7 @@ final class NewsView: UIView {
     private func configureSubviews() {
         tableView.rowHeight = 122
         tableView.estimatedRowHeight = 122
+        tableView.tableFooterView = footerView
     }
 }
 

@@ -22,9 +22,7 @@ final class SearchViewController: UIViewController {
         
         fetchedResultsManager = FetchedResultsManager(
             delegate: self,
-            predicate: nil,
-            sortDescriptors: [NSSortDescriptor(key: "dateForSorting", ascending: false)],
-            sectionNameKeyPath: nil
+            sortDescriptors: [NSSortDescriptor(key: "dateForSorting", ascending: false)]
         )
         
         addSubviews()
@@ -36,17 +34,6 @@ final class SearchViewController: UIViewController {
         super.viewDidAppear(animated)
         navigationItem.hidesSearchBarWhenScrolling = false
     }
-    
-//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        super.touchesBegan(touches, with: event)
-//        
-//        self.next?.touchesBegan(touches, with: event)
-//        
-//        searchController.searchBar.endEditing(true)
-//        searchController.searchBar.text = ""
-//        searchController.searchBar.showsCancelButton = false
-//        navigationItem.searchController?.isActive = false
-//    }
     
     private func addSubviews() {
         view.addSubview(tableView)
@@ -74,6 +61,13 @@ final class SearchViewController: UIViewController {
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search news..."
     }
+    
+    private func routeToNewsViewController(searchText: String, viewController: NewsViewController) {
+        newsManager.saveSearchText(text: searchText)
+        viewController.searchText = searchText
+        self.navigationController?.pushViewController(viewController, animated: true)
+        navigationItem.searchController?.isActive = false
+    }
 }
 
 extension SearchViewController: NSFetchedResultsControllerDelegate {
@@ -92,11 +86,7 @@ extension SearchViewController: NSFetchedResultsControllerDelegate {
         case .update:
             guard let indexPath = indexPath else { return }
             tableView.reloadRows(at: [indexPath], with: .fade)
-        case .move:
-            guard let newIndexPath = newIndexPath, let indexPath = indexPath else { return }
-            tableView.deleteRows(at: [indexPath], with: .fade)
-            tableView.insertRows(at: [newIndexPath], with: .fade)
-        @unknown default:
+        default:
             print("Add new case to didChange anObject")
         }
     }

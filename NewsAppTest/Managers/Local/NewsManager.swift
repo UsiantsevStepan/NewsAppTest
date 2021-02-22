@@ -25,54 +25,34 @@ final class NewsManager {
     
     private let networkManager = NetworkManager()
     private let dataParser = DataParser()
-    private var searchTotalResults = 0
-    private var searchData = [(String, [Article])]()
+    private let dateFormatter = DateFormatter()
     
     //MARK: - Reference to child MOC
     let context = CoreDataStack.instance.childMoc
     
-    public func loadSerchedNews(searchText: String, date: Date, completion: @escaping ((Result<Int, Error>)) -> Void) {
-        let group = DispatchGroup()
-        let queue = DispatchQueue.global(qos: .background)
-        
-        group.enter()
-        queue.async {
+    public func loadSerchedNews(searchText: String, date: Date, completion: @escaping (Error?) -> Void) {
+        DispatchQueue.global(qos: .default).async {
             self.networkManager.getData(with: ApiEndpoint.searchNewsUpTo(text: searchText, date: date.iso8601withFractionalSeconds)) { [weak self] result in
                 guard let self = self else { return }
                 
                 switch result {
                 case let .failure(error):
-                    completion(.failure(error))
-                    group.leave()
+                    completion(error)
                 case let .success(data):
                     guard let searchData = self.dataParser.parse(withData: data, to: NewsData.self) else {
-                        completion(.failure(NewsManagerError.parseError))
-                        group.leave()
+                        completion(NewsManagerError.parseError)
                         return
                     }
                     
                     if searchData.totalResults == 0 {
-                        completion(.failure(NewsManagerError.noNews))
-                        group.leave()
+                        completion(NewsManagerError.noNews)
                         return
                     }
+                    self.saveNews(text: searchText, news: searchData.articles)
                     
-                    self.searchData.append((searchText, searchData.articles))
-                    self.searchTotalResults = searchData.totalResults
-                    group.leave()
+                    completion(nil)
                 }
             }
-        }
-        
-        group.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            
-            // MARK: - Saving news Data to DB
-            for article in self.searchData {
-                self.saveNews(text: article.0, news: article.1)
-            }
-            
-            completion(.success(self.searchTotalResults))
         }
     }
     
@@ -148,14 +128,12 @@ final class NewsManager {
 
 private extension NewsManager {
     func dateFormat(with date: Date) -> String {
-        let dateFormatter = DateFormatter()
         dateFormatter.locale = .current
         dateFormatter.dateFormat = "dd MMMM yyyy"
         return dateFormatter.string(from: date)
     }
     
     func stringFromDate(date: Date) -> String {
-        let dateFormatter = DateFormatter()
         return dateFormatter.string(from: date)
     }
 }

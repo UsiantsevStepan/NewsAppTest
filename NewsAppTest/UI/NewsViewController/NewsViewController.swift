@@ -11,14 +11,11 @@ import SafariServices
 
 final class NewsViewController: UIViewController {
     private let newsManager = NewsManager()
-    private var totalResults = 0
     private var fetchedResultsManager: FetchedResultsManager<ArticlePreview>?
-    private let footerView = FooterView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 30))
     private var isLoading = false
-    private var isPageAfterDB = false
     private let newsView = NewsView()
     
-    var searchText = ""
+    var searchText: String?
     
     override func loadView() {
         view = newsView
@@ -31,7 +28,8 @@ final class NewsViewController: UIViewController {
         
         newsView.tableView.delegate = self
         newsView.tableView.dataSource = self
-        newsView.tableView.tableFooterView = footerView
+        
+        guard let searchText = searchText else { return }
         
         fetchedResultsManager = FetchedResultsManager(
             delegate: self,
@@ -45,22 +43,23 @@ final class NewsViewController: UIViewController {
     
     private func loadPage(with date: Date) {
         isLoading = true
-        footerView.showActivityIndicator()
+        newsView.footerView.showActivityIndicator()
         
-        newsManager.loadSerchedNews(searchText: searchText, date: date) { [weak self] result in
+        guard let searchText = searchText else { return }
+        
+        newsManager.loadSerchedNews(searchText: searchText, date: date) { [weak self] error in
             guard let self = self else { return }
             
-            switch result {
-            case let .failure(error):
+            if let error = error {
                 DispatchQueue.main.async {
-                    self.showError(error)                    
+                    self.showError(error)
                 }
-                return
-            case let .success(data):
-                self.totalResults = data
+            } else {
+                DispatchQueue.main.async {
+                    self.newsView.footerView.hideActivityIndicator()
+                }
+                self.isLoading = false                
             }
-            self.footerView.hideActivityIndicator()
-            self.isLoading = false
         }
     }
 }
@@ -95,7 +94,7 @@ extension NewsViewController: NSFetchedResultsControllerDelegate {
             guard let indexPath = indexPath else { return }
             newsView.tableView.deleteRows(at: [indexPath], with: .none)
         default:
-            print("Add new case to didChange anObject")
+            break
         }
     }
     
@@ -157,4 +156,3 @@ extension NewsViewController: UITableViewDelegate {
         present(safariViewController, animated: true, completion: nil)
     }
 }
-

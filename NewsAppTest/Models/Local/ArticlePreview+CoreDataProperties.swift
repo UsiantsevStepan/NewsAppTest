@@ -9,6 +9,8 @@
 import Foundation
 import CoreData
 
+@objc(ArticlePreview)
+public class ArticlePreview: NSManagedObject {}
 
 extension ArticlePreview {
     

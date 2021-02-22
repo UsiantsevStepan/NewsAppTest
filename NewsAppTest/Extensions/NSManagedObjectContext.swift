@@ -21,11 +21,5 @@ extension NSManagedObjectContext {
             }
         }
     }
-    
-    func clearData(in entity: NSManagedObject.Type) throws {
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: String(describing: entity))
-        let objects = try fetch(request) as! [NSManagedObject]
-        objects.forEach { delete($0) }
-    }
 }
 

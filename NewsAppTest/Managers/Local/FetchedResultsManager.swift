@@ -12,10 +12,10 @@ final class FetchedResultsManager<T: NSManagedObject>: NSObject, NSFetchedResult
     let fetchedResultsController: NSFetchedResultsController<T>
     
     init(
-        delegate: NSFetchedResultsControllerDelegate,
-        predicate: NSPredicate?,
+        delegate: NSFetchedResultsControllerDelegate? = nil,
+        predicate: NSPredicate? = nil,
         sortDescriptors: [NSSortDescriptor] = [],
-        sectionNameKeyPath: String?
+        sectionNameKeyPath: String? = nil
     ) {
         let request = NSFetchRequest<T>(entityName: String(describing: T.self))
         request.predicate = predicate

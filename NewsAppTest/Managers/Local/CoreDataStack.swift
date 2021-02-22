@@ -14,8 +14,6 @@ final class CoreDataStack {
     // MARK: - Core Data stack
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "NewsAppTest")
-        //MARK: - Print sqlite file's path
-        print(container.persistentStoreDescriptions.first?.url)
         container.viewContext.mergePolicy = NSMergeByPropertyStoreTrumpMergePolicy
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {

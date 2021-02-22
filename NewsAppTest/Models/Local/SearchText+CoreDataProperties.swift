@@ -9,6 +9,8 @@
 import Foundation
 import CoreData
 
+@objc(SearchText)
+public class SearchText: NSManagedObject {}
 
 extension SearchText {
     

@@ -34,7 +34,7 @@ extension ApiEndpoint: EndpointProtocol {
             // MARK: - 4 Api keys in case if one is not enough for you :) Each allows 100 request per day (updates every 12 hours)
             //            "apiKey" : "0fa2296c3e0c4b03bcffabfc169fa429",
             //            "apiKey" : "becccb11743f4549879559158c4606df",
-//            "apiKey" : "8c2922169e7a44ec9c42958aed00a3fa",
+            //            "apiKey" : "8c2922169e7a44ec9c42958aed00a3fa",
             "apiKey" : "cf6372e3eea84ae1af5a369d33f9f65a",
             "language" : "en",
             "sortBy" : "publishedAt"
@@ -42,19 +42,19 @@ extension ApiEndpoint: EndpointProtocol {
         
         switch self {
         case let .searchNews(text: text, page: page):
-            queryParams.updateValue(text, forKey: "q")
-            queryParams.updateValue("\(page)", forKey: "page")
+            queryParams["q"] = text
+            queryParams["page"] = "\(page)"
             return queryParams
             
         case let .searchNewsUpTo(text: text, date: date):
-            queryParams.updateValue(text, forKey: "q")
-            queryParams.updateValue(date, forKey: "to")
+            queryParams["q"] = text
+            queryParams["to"] = date
             return queryParams
             
         case let .searchNewsFrom(text: text, date: date, page: page):
-            queryParams.updateValue(text, forKey: "q")
-            queryParams.updateValue(date, forKey: "from")
-            queryParams.updateValue("\(page)", forKey: "page")
+            queryParams["q"] = text
+            queryParams["page"] = "\(page)"
+            queryParams["from"] = date
             return queryParams
         }
         
