@@ -41,7 +41,9 @@ class NewsView: UIView {
     
         private func configureSubviews() {
             tableView.rowHeight = UITableView.automaticDimension
-            tableView.estimatedRowHeight = 100
+            tableView.estimatedRowHeight = 1000
+//            tableView.estimatedRowHeight = UITableView.automaticDimension
+//            tableView.estimatedRowHeight = 1000
         }
 }
 

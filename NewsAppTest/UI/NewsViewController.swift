@@ -13,7 +13,6 @@ class NewsViewController: UIViewController {
     private let newsManager = NewsManager()
     private var totalResults = 0
     private var fetchedResultsManager: FetchedResultsManager<ArticlePreview>?
-//    private var container = (UIApplication.shared.delegate as! AppDelegate).persistentContainer
     private let footerView = FooterView()
     private var isLoading = false
     private var isPageAfterDB = false
@@ -138,7 +137,7 @@ extension NewsViewController: UITableViewDelegate {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         
-        if offsetY > 0, offsetY > contentHeight - scrollView.frame.height - 100 {
+        if offsetY > 0, offsetY > contentHeight - scrollView.frame.height {
             if isLoading { return }
             guard let date = fetchedResultsManager?.fetchedResultsController.fetchedObjects?.last?.dateForSorting else { return }
             loadPage(with: date)
@@ -159,5 +158,9 @@ extension NewsViewController: UITableViewDelegate {
         let safariViewController = SFSafariViewController(url: url)
         present(safariViewController, animated: true, completion: nil)
     }
+    
+//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+//        200
+//    }
 }
 

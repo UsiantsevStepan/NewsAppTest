@@ -13,7 +13,6 @@ class SearchViewController: UIViewController {
     private let tableView = UITableView()
     private let newsManager = NewsManager()
     private var fetchedResultsManager: FetchedResultsManager<SearchText>?
-//    private var container = (UIApplication.shared.delegate as! AppDelegate).persistentContainer
     
     override func viewDidLoad() {
         super.viewDidLoad()

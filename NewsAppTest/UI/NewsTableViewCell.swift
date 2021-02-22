@@ -40,8 +40,6 @@ class NewsTableViewCell: UITableViewCell {
     }
     
     private func addSubviews() {
-//        contentView.addSubview(newsImage)
-//        [titleLabel, descriptionLabel].forEach(newsImage.addSubview)
         [newsImage, titleLabel, descriptionLabel].forEach(contentView.addSubview)
     }
     
