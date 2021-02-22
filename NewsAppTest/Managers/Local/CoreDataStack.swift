@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-class CoreDataStack {
+final class CoreDataStack {
     static let instance = CoreDataStack()
     
     // MARK: - Core Data stack
@@ -17,7 +17,6 @@ class CoreDataStack {
         //MARK: - Print sqlite file's path
         print(container.persistentStoreDescriptions.first?.url)
         container.viewContext.mergePolicy = NSMergeByPropertyStoreTrumpMergePolicy
-//        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
@@ -33,7 +32,6 @@ class CoreDataStack {
     var childMoc: NSManagedObjectContext {
         let moc = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         moc.mergePolicy = NSMergeByPropertyStoreTrumpMergePolicy
-//        moc.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         moc.parent = self.context
         return moc
     }

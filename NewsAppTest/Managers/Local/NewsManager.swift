@@ -8,12 +8,18 @@
 import UIKit
 import CoreData
 
-class NewsManager {
+final class NewsManager {
     enum NewsManagerError: LocalizedError {
         case parseError
+        case noNews
         
         var errorDescription: String? {
-            return "Data hasn't been parsed or has been parsed incorrectly"
+            switch self {
+            case .parseError:
+                return "Data hasn't been parsed or has been parsed incorrectly."
+            case .noNews:
+                return "No news found. Try another search text!"
+            }
         }
     }
     
@@ -22,10 +28,8 @@ class NewsManager {
     private var searchTotalResults = 0
     private var searchData = [(String, [Article])]()
     
-    //MARK: - Reference to manged object context
-//    static let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    //MARK: - Reference to child MOC
     let context = CoreDataStack.instance.childMoc
-//    let persistentStoreCoordinator = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.persistentStoreCoordinator
     
     public func loadSerchedNews(searchText: String, date: Date, completion: @escaping ((Result<Int, Error>)) -> Void) {
         let group = DispatchGroup()
@@ -46,6 +50,13 @@ class NewsManager {
                         group.leave()
                         return
                     }
+                    
+                    if searchData.totalResults == 0 {
+                        completion(.failure(NewsManagerError.noNews))
+                        group.leave()
+                        return
+                    }
+                    
                     self.searchData.append((searchText, searchData.articles))
                     self.searchTotalResults = searchData.totalResults
                     group.leave()
@@ -82,9 +93,9 @@ class NewsManager {
         
         
         // MARK: - Saving data to DB
-            context.saveContext() {
-                CoreDataStack.instance.context.saveContext()
-            }
+        context.saveContext() {
+            CoreDataStack.instance.context.saveContext()
+        }
     }
     
     public func saveIsViewed(article: ArticlePreview) {
@@ -111,20 +122,20 @@ class NewsManager {
             let request = ArticlePreview.createFetchRequest() as NSFetchRequest<ArticlePreview>
             let predicate = NSPredicate(format: "id == %@", (article.title ?? "") + (article.description ?? ""))
             request.predicate = predicate
-
+            
             if (try? context.fetch(request).first) != nil {
                 continue
             } else {
-            
-            newArticle.title = article.title
-            newArticle.articleDesription = article.description
-            newArticle.id = (article.title ?? "") + (article.description ?? "")
-            newArticle.articlePath = article.url
-            newArticle.imagePath = article.urlToImage
-            newArticle.publishDate = dateFormat(with: article.publishedAt)
-            newArticle.dateForSorting = article.publishedAt
-            newArticle.isViewed = false
-            newArticle.searchKeyword = searchText.value
+                
+                newArticle.title = article.title
+                newArticle.articleDesription = article.description
+                newArticle.id = (article.title ?? "") + (article.description ?? "")
+                newArticle.articlePath = article.url
+                newArticle.imagePath = article.urlToImage
+                newArticle.publishDate = dateFormat(with: article.publishedAt)
+                newArticle.dateForSorting = article.publishedAt
+                newArticle.isViewed = false
+                newArticle.searchKeyword = searchText.value
             }
         }
         

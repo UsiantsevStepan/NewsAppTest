@@ -7,7 +7,7 @@
 
 import UIKit
 
-class FooterView: UIView {
+final class FooterView: UIView {
     private var pageActivityIndicator = UIActivityIndicatorView()
     
     override init(frame: CGRect) {
@@ -26,9 +26,9 @@ class FooterView: UIView {
         pageActivityIndicator.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            pageActivityIndicator.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor, constant: 4),
-            pageActivityIndicator.centerXAnchor.constraint(equalTo: layoutMarginsGuide.centerXAnchor),
-            pageActivityIndicator.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor, constant: -4)
+            pageActivityIndicator.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 4),
+            pageActivityIndicator.centerXAnchor.constraint(equalTo: safeAreaLayoutGuide.centerXAnchor),
+            pageActivityIndicator.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -4)
         ])
         
         pageActivityIndicator.style = .medium

@@ -7,10 +7,9 @@
 
 import UIKit
 
-class NewsTableViewCell: UITableViewCell {
+final class NewsTableViewCell: UITableViewCell {
     static let reuseId = "NewsTableViewCellReuseId"
     
-//    private let newsImage = UIImageView()
     private let newsImage = NewsImage(frame: .zero)
     private let titleLabel = UILabel()
     private let descriptionLabel = UILabel()
@@ -32,11 +31,11 @@ class NewsTableViewCell: UITableViewCell {
         
         titleLabel.text = nil
         descriptionLabel.text = nil
+        newsImage.cancelTask()
         newsImage.image = nil
         titleLabel.alpha = 1
         descriptionLabel.alpha = 1
         newsImage.alpha = 1
-        newsImage.cancelTask()
     }
     
     private func addSubviews() {
@@ -64,7 +63,7 @@ class NewsTableViewCell: UITableViewCell {
             descriptionLabel.leadingAnchor.constraint(equalTo: newsImage.trailingAnchor, constant: 4),
             descriptionLabel.trailingAnchor.constraint(equalTo: marginGuide.trailingAnchor),
             descriptionLabel.bottomAnchor.constraint(equalTo: marginGuide.bottomAnchor)
-            ])
+        ])
     }
     
     private func configureSubviews() {
@@ -75,8 +74,8 @@ class NewsTableViewCell: UITableViewCell {
         newsImage.layer.borderColor = UIColor.black.withAlphaComponent(0.5).cgColor
         
         titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
-        titleLabel.numberOfLines = 0
-        titleLabel.lineBreakMode = .byWordWrapping
+        titleLabel.numberOfLines = 2
+        titleLabel.lineBreakMode = .byTruncatingTail
         
         descriptionLabel.numberOfLines = 3
         descriptionLabel.lineBreakMode = .byTruncatingTail
@@ -85,9 +84,7 @@ class NewsTableViewCell: UITableViewCell {
     func configure(article: ArticlePreview) {
         titleLabel.text = article.title
         descriptionLabel.text = article.articleDesription
-//        guard let urlString = article.imagePath else { return }
         
-//        print(urlString)
         newsImage.setImage(from: article.imagePath)
         
         if article.isViewed {
@@ -95,17 +92,5 @@ class NewsTableViewCell: UITableViewCell {
             descriptionLabel.alpha = 0.5
             newsImage.alpha = 0.5
         }
-    }
-}
-
-extension String {
-    func getLabelFrameHeight(constraintedWidth width: CGFloat, font: UIFont) -> CGFloat {
-        let label = UILabel(frame: CGRect(x: 0, y: 0, width: width, height: .greatestFiniteMagnitude))
-        label.numberOfLines = 0
-        label.text = self
-        label.font = font
-        label.sizeToFit()
-        
-        return label.frame.height
     }
 }

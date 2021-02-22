@@ -11,9 +11,7 @@ protocol Network {
     func getData(with endpoint: EndpointProtocol, completion: @escaping ((Result<Data,Error>) -> Void))
 }
 
-class NetworkManager {}
-
-extension NetworkManager: Network {
+final class NetworkManager: Network {
     func getData(with endpoint: EndpointProtocol, completion: @escaping ((Result<Data,Error>) -> Void)) {
         guard let request = performRequest(for: endpoint) else {
             completion(.failure(NetworkManagerError.requestError))
@@ -37,7 +35,7 @@ private extension NetworkManager {
         guard let url = urlComponents.url else { return nil }
         
         let urlRequest = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-        print("URLdate: \(urlRequest.url)")
+        
         return urlRequest
     }
     

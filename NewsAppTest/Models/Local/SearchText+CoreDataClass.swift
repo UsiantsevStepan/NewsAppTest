@@ -11,5 +11,5 @@ import CoreData
 
 @objc(SearchText)
 public class SearchText: NSManagedObject {
-
+    
 }

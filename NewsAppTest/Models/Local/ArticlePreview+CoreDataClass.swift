@@ -11,5 +11,5 @@ import CoreData
 
 @objc(ArticlePreview)
 public class ArticlePreview: NSManagedObject {
-
+    
 }

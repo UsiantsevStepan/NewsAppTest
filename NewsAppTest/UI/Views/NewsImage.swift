@@ -7,7 +7,7 @@
 
 import UIKit
 
-class NewsImage: UIImageView {
+final class NewsImage: UIImageView {
     static var imageCache = NSCache<NSString, UIImage>()
     static let imagePlaceholder = #imageLiteral(resourceName: "placeholder")
     
@@ -42,9 +42,10 @@ class NewsImage: UIImageView {
             return
         }
         
-        print("Cache: \(NewsImage.imageCache.object(forKey: urlString as NSString))")
         if let image = NewsImage.imageCache.object(forKey: urlString as NSString) {
-            self.image = image
+            DispatchQueue.main.async {
+                self.image = image
+            }
             return
         }
         
@@ -74,26 +75,29 @@ class NewsImage: UIImageView {
             return
         }
         
-        task = URLSession.shared.dataTask(with: url) { [weak self] (data, _, error) in
+        let task = URLSession.shared.dataTask(with: url) { [weak self] (data, _, error) in
             guard let self = self else { return }
-            guard error == nil, let data = data, let image = UIImage(data: data) else {
+            guard error == nil else {
                 self.dropImage()
                 return
             }
             
-                DispatchQueue.main.async {
-                    if self.imageUrlString == urlString {
+            guard let unwrappedData = data, let image = UIImage(data: unwrappedData) else {
+                self.dropImage()
+                return
+            }
+            
+            DispatchQueue.main.async {
+                if self.imageUrlString == urlString {
                     self.activityIndicator.stopAnimating()
                     self.image = image
                 }
-                //                self.image = image
+                
                 NewsImage.imageCache.setObject(image, forKey: urlString as NSString)
             }
             
-//            NewsImage.imageCache.setObject(image, forKey: urlString as NSString)
-            
         }
-        task?.resume()
-//        self.task = task
+        task.resume()
+        self.task = task
     }
 }

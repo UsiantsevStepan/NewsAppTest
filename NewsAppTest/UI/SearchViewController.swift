@@ -8,7 +8,7 @@
 import UIKit
 import CoreData
 
-class SearchViewController: UIViewController {
+final class SearchViewController: UIViewController {
     private let searchController = UISearchController(searchResultsController: nil)
     private let tableView = UITableView()
     private let newsManager = NewsManager()
@@ -17,7 +17,6 @@ class SearchViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.isUserInteractionEnabled = true
-        overrideUserInterfaceStyle = .light
         view.backgroundColor = .white
         navigationItem.searchController = searchController
         
@@ -38,17 +37,16 @@ class SearchViewController: UIViewController {
         navigationItem.hidesSearchBarWhenScrolling = false
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesBegan(touches, with: event)
-        
-        self.next?.touchesBegan(touches, with: event)
-        
-        searchController.searchBar.endEditing(true)
-        searchController.searchBar.text = ""
-        searchController.searchBar.showsCancelButton = false
-        navigationItem.searchController?.isActive = false
-        print("touch")
-    }
+//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        super.touchesBegan(touches, with: event)
+//        
+//        self.next?.touchesBegan(touches, with: event)
+//        
+//        searchController.searchBar.endEditing(true)
+//        searchController.searchBar.text = ""
+//        searchController.searchBar.showsCancelButton = false
+//        navigationItem.searchController?.isActive = false
+//    }
     
     private func addSubviews() {
         view.addSubview(tableView)
@@ -115,18 +113,15 @@ extension SearchViewController: UISearchBarDelegate {
         newsManager.saveSearchText(text: searchText)
         searchResultsViewController.searchText = searchText
         self.navigationController?.pushViewController(searchResultsViewController, animated: true)
+        navigationItem.searchController?.isActive = false
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        
         searchController.searchBar.showsCancelButton = false
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        guard
-            let searchText = searchBar.text,
-            !searchText.trimmingCharacters(in: .whitespaces).isEmpty
-        else {
+        guard let searchText = searchBar.text, !searchText.trimmingCharacters(in: .whitespaces).isEmpty else {
             searchBar.setShowsCancelButton(false, animated: true)
             return
         }
@@ -136,7 +131,6 @@ extension SearchViewController: UISearchBarDelegate {
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         searchController.searchBar.showsCancelButton = false
-        //        navigationItem.searchController?.isActive = false
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -145,6 +139,7 @@ extension SearchViewController: UISearchBarDelegate {
         newsManager.saveSearchText(text: searchText)
         searchResultsViewController.searchText = searchText
         self.navigationController?.pushViewController(searchResultsViewController, animated: true)
+        navigationItem.searchController?.isActive = false
     }
 }
 
@@ -159,6 +154,9 @@ extension SearchViewController: UITableViewDataSource {
         guard let searchRequest = fetchedResultsManager?.fetchedResultsController.object(at: indexPath) else { return cell }
         cell.textLabel?.textAlignment = .center
         cell.textLabel?.text = searchRequest.value
+        cell.preservesSuperviewLayoutMargins = false
+        cell.separatorInset = UIEdgeInsets.zero
+        cell.layoutMargins = UIEdgeInsets.zero
         
         return cell
     }
@@ -167,6 +165,7 @@ extension SearchViewController: UITableViewDataSource {
 extension SearchViewController: UITableViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         searchController.searchBar.endEditing(true)
+        navigationItem.searchController?.isActive = false
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -175,5 +174,6 @@ extension SearchViewController: UITableViewDelegate {
         newsManager.saveSearchText(text: searchText)
         searchResultsViewController.searchText = searchText
         self.navigationController?.pushViewController(searchResultsViewController, animated: true)
+        navigationItem.searchController?.isActive = false
     }
 }

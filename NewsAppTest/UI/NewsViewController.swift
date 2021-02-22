@@ -9,11 +9,11 @@ import UIKit
 import CoreData
 import SafariServices
 
-class NewsViewController: UIViewController {
+final class NewsViewController: UIViewController {
     private let newsManager = NewsManager()
     private var totalResults = 0
     private var fetchedResultsManager: FetchedResultsManager<ArticlePreview>?
-    private let footerView = FooterView()
+    private let footerView = FooterView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 30))
     private var isLoading = false
     private var isPageAfterDB = false
     private let newsView = NewsView()
@@ -29,9 +29,10 @@ class NewsViewController: UIViewController {
         
         navigationItem.title = searchText
         
-        NewsView.tableView.delegate = self
-        NewsView.tableView.dataSource = self
-        NewsView.tableView.tableFooterView = footerView
+        newsView.tableView.delegate = self
+        newsView.tableView.dataSource = self
+        newsView.tableView.tableFooterView = footerView
+        
         fetchedResultsManager = FetchedResultsManager(
             delegate: self,
             predicate: NSPredicate(format: "searchKeyword == %@", searchText),
@@ -46,38 +47,37 @@ class NewsViewController: UIViewController {
         isLoading = true
         footerView.showActivityIndicator()
         
-        print("StartDate: \(date)")
         newsManager.loadSerchedNews(searchText: searchText, date: date) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
             case let .failure(error):
-                print(error.localizedDescription)
+                DispatchQueue.main.async {
+                    self.showError(error)                    
+                }
                 return
             case let .success(data):
                 self.totalResults = data
             }
             self.footerView.hideActivityIndicator()
             self.isLoading = false
-            print("Date: \(String(describing: self.fetchedResultsManager?.fetchedResultsController.fetchedObjects?.last?.dateForSorting))")
-            print("FetchedObjects: \(self.fetchedResultsManager?.fetchedResultsController.fetchedObjects?.count)")
         }
     }
 }
 
 extension NewsViewController: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        NewsView.tableView.beginUpdates()
+        newsView.tableView.beginUpdates()
     }
     
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
         switch type {
         case .insert:
-            NewsView.tableView.insertSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
+            newsView.tableView.insertSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
         case .update:
-            NewsView.tableView.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
+            newsView.tableView.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
         case .delete:
-            NewsView.tableView.deleteSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
+            newsView.tableView.deleteSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
         default:
             print("Unknown case of didChange sectionInfo")
         }
@@ -87,13 +87,13 @@ extension NewsViewController: NSFetchedResultsControllerDelegate {
         switch type {
         case .update:
             guard let indexPath = indexPath else { return }
-            NewsView.tableView.reloadRows(at: [indexPath], with: .none)
+            newsView.tableView.reloadRows(at: [indexPath], with: .none)
         case .insert:
             guard let newIndexPath = newIndexPath else { return }
-            NewsView.tableView.insertRows(at: [newIndexPath], with: .none)
+            newsView.tableView.insertRows(at: [newIndexPath], with: .none)
         case .delete:
             guard let indexPath = indexPath else { return }
-            NewsView.tableView.deleteRows(at: [indexPath], with: .none)
+            newsView.tableView.deleteRows(at: [indexPath], with: .none)
         default:
             print("Add new case to didChange anObject")
         }
@@ -101,7 +101,7 @@ extension NewsViewController: NSFetchedResultsControllerDelegate {
     
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        NewsView.tableView.endUpdates()
+        newsView.tableView.endUpdates()
     }
 }
 
@@ -114,11 +114,12 @@ extension NewsViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: NewsTableViewCell.reuseId, for: indexPath) as! NewsTableViewCell
         guard let article = fetchedResultsManager?.fetchedResultsController.object(at: indexPath) else { return cell }
         cell.configure(article: article)
+        cell.preservesSuperviewLayoutMargins = false
+        cell.separatorInset = UIEdgeInsets.zero
+        cell.layoutMargins = UIEdgeInsets.zero
         
         return cell
     }
-    
-    
 }
 
 extension NewsViewController: UITableViewDelegate {
@@ -142,7 +143,7 @@ extension NewsViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        NewsView.tableView.deselectRow(at: indexPath, animated: true)
+        newsView.tableView.deselectRow(at: indexPath, animated: true)
         
         guard
             let urlString = fetchedResultsManager?.fetchedResultsController.object(at: indexPath).articlePath,

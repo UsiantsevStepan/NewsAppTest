@@ -10,7 +10,6 @@ import CoreData
 
 extension NSManagedObjectContext {
     // MARK: - Core Data Saving support
-    
     func saveContext(completion: (() -> Void)? = nil) {
         if hasChanges {
             do {

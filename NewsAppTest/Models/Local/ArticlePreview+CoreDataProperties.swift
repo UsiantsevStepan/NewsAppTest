@@ -11,11 +11,11 @@ import CoreData
 
 
 extension ArticlePreview {
-
+    
     @nonobjc public class func createFetchRequest() -> NSFetchRequest<ArticlePreview> {
         return NSFetchRequest<ArticlePreview>(entityName: "ArticlePreview")
     }
-
+    
     @NSManaged public var articleDesription: String?
     @NSManaged public var articlePath: String?
     @NSManaged public var dateForSorting: Date?
@@ -25,9 +25,9 @@ extension ArticlePreview {
     @NSManaged public var publishDate: String?
     @NSManaged public var title: String?
     @NSManaged public var searchKeyword: String?
-
+    
 }
 
 extension ArticlePreview : Identifiable {
-
+    
 }
