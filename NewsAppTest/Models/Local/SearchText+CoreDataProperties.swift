@@ -10,18 +10,11 @@ import Foundation
 import CoreData
 
 @objc(SearchText)
-public class SearchText: NSManagedObject {}
-
-extension SearchText {
-    
+public class SearchText: NSManagedObject, Identifiable {
     @nonobjc public class func createFetchRequest() -> NSFetchRequest<SearchText> {
         return NSFetchRequest<SearchText>(entityName: "SearchText")
     }
     
     @NSManaged public var dateForSorting: Date?
     @NSManaged public var value: String?
-}
-
-extension SearchText : Identifiable {
-    
 }

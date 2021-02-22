@@ -96,8 +96,6 @@ final class NewsManager {
         
         // MARK: - Creating an article object
         for article in news {
-            let newArticle = ArticlePreview(context: context)
-            
             // MARK: - Fetch existing news
             let request = ArticlePreview.createFetchRequest() as NSFetchRequest<ArticlePreview>
             let predicate = NSPredicate(format: "id == %@", (article.title ?? "") + (article.description ?? ""))
@@ -106,6 +104,7 @@ final class NewsManager {
             if (try? context.fetch(request).first) != nil {
                 continue
             } else {
+                let newArticle = ArticlePreview(context: context)
                 
                 newArticle.title = article.title
                 newArticle.articleDesription = article.description
@@ -130,10 +129,6 @@ private extension NewsManager {
     func dateFormat(with date: Date) -> String {
         dateFormatter.locale = .current
         dateFormatter.dateFormat = "dd MMMM yyyy"
-        return dateFormatter.string(from: date)
-    }
-    
-    func stringFromDate(date: Date) -> String {
         return dateFormatter.string(from: date)
     }
 }

@@ -10,10 +10,7 @@ import Foundation
 import CoreData
 
 @objc(ArticlePreview)
-public class ArticlePreview: NSManagedObject {}
-
-extension ArticlePreview {
-    
+public class ArticlePreview: NSManagedObject, Identifiable {
     @nonobjc public class func createFetchRequest() -> NSFetchRequest<ArticlePreview> {
         return NSFetchRequest<ArticlePreview>(entityName: "ArticlePreview")
     }
@@ -26,10 +23,5 @@ extension ArticlePreview {
     @NSManaged public var isViewed: Bool
     @NSManaged public var publishDate: String?
     @NSManaged public var title: String?
-    @NSManaged public var searchKeyword: String?
-    
-}
-
-extension ArticlePreview : Identifiable {
-    
+    @NSManaged public var searchKeyword: String?   
 }

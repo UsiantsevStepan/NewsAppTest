@@ -78,7 +78,7 @@ extension NewsViewController: NSFetchedResultsControllerDelegate {
         case .delete:
             newsView.tableView.deleteSections(NSIndexSet(index: sectionIndex) as IndexSet, with: .none)
         default:
-            print("Unknown case of didChange sectionInfo")
+            break
         }
     }
     
@@ -134,8 +134,7 @@ extension NewsViewController: UITableViewDelegate {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         
-        if offsetY > 0, offsetY > contentHeight - scrollView.frame.height {
-            if isLoading { return }
+        if offsetY > 0, offsetY > contentHeight - scrollView.frame.height, !isLoading {
             guard let date = fetchedResultsManager?.fetchedResultsController.fetchedObjects?.last?.dateForSorting else { return }
             loadPage(with: date)
         }
@@ -146,10 +145,10 @@ extension NewsViewController: UITableViewDelegate {
         
         guard
             let urlString = fetchedResultsManager?.fetchedResultsController.object(at: indexPath).articlePath,
-            let url = URL(string: urlString)
+            let url = URL(string: urlString),
+            let article = fetchedResultsManager?.fetchedResultsController.object(at: indexPath)
         else { return }
         
-        guard let article = fetchedResultsManager?.fetchedResultsController.object(at: indexPath) else { return }
         newsManager.saveIsViewed(article: article)
         
         let safariViewController = SFSafariViewController(url: url)

@@ -87,7 +87,7 @@ extension SearchViewController: NSFetchedResultsControllerDelegate {
             guard let indexPath = indexPath else { return }
             tableView.reloadRows(at: [indexPath], with: .fade)
         default:
-            print("Add new case to didChange anObject")
+            break
         }
     }
     
