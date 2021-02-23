@@ -62,10 +62,11 @@ final class SearchViewController: UIViewController {
         searchController.searchBar.placeholder = "Search news..."
     }
     
-    private func routeToNewsViewController(searchText: String, viewController: NewsViewController) {
-        newsManager.saveSearchText(text: searchText)
-        viewController.searchText = searchText
-        navigationController?.pushViewController(viewController, animated: true)
+    private func routeToNewsViewController(searchText: String) {
+        let newsViewController = NewsViewController()
+        let searchTextEntity = newsManager.saveSearchText(text: searchText)
+        newsViewController.searchText = searchTextEntity
+        navigationController?.pushViewController(newsViewController, animated: true)
         navigationItem.searchController?.isActive = false
     }
 }
@@ -99,8 +100,7 @@ extension SearchViewController: NSFetchedResultsControllerDelegate {
 extension SearchViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let searchText = searchBar.text else { return }
-        let newsViewController = NewsViewController()
-        routeToNewsViewController(searchText: searchText, viewController: newsViewController)
+        routeToNewsViewController(searchText: searchText)
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
@@ -122,8 +122,7 @@ extension SearchViewController: UISearchBarDelegate {
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         guard let searchText = searchBar.text, searchText != "" else { return }
-        let newsViewController = NewsViewController()
-        routeToNewsViewController(searchText: searchText, viewController: newsViewController)
+        routeToNewsViewController(searchText: searchText)
     }
 }
 
@@ -154,7 +153,6 @@ extension SearchViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let searchText = fetchedResultsManager?.fetchedResultsController.object(at: indexPath).value else { return }
-        let newsViewController = NewsViewController()
-        routeToNewsViewController(searchText: searchText, viewController: newsViewController)
+        routeToNewsViewController(searchText: searchText)
     }
 }

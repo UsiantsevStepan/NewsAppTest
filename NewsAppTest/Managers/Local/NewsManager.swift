@@ -30,9 +30,11 @@ final class NewsManager {
     //MARK: - Reference to child MOC
     let context = CoreDataStack.instance.childMoc
     
-    public func loadSerchedNews(searchText: String, date: Date, completion: @escaping (Error?) -> Void) {
+    public func loadSerchedNews(searchText: SearchText, date: Date, completion: @escaping (Error?) -> Void) {
         DispatchQueue.global(qos: .default).async {
-            self.networkManager.getData(with: ApiEndpoint.searchNewsUpTo(text: searchText, date: date.iso8601withFractionalSeconds)) { [weak self] result in
+            guard let text = searchText.value else { return }
+            
+            self.networkManager.getData(with: ApiEndpoint.searchNewsUpTo(text: text, date: date.iso8601withFractionalSeconds)) { [weak self] result in
                 guard let self = self else { return }
                 
                 switch result {
@@ -48,7 +50,7 @@ final class NewsManager {
                         completion(NewsManagerError.noNews)
                         return
                     }
-                    self.saveNews(text: searchText, news: searchData.articles)
+                    self.saveNews(searchText: searchText, news: searchData.articles)
                     
                     completion(nil)
                 }
@@ -56,19 +58,22 @@ final class NewsManager {
         }
     }
     
-    public func saveSearchText(text: String) {
+    public func saveSearchText(text: String) -> SearchText? {
+        var searchText: SearchText?
+        
         // MARK: - Fetch SearchText entity which stores news
         let request = SearchText.createFetchRequest() as NSFetchRequest<SearchText>
         let predicate = NSPredicate(format: "value == %@", text)
         request.predicate = predicate
         
-        if let searchText = try? context.fetch(request).first {
-            searchText.dateForSorting = Date()
+        if let fetchedSearchText = try? context.fetch(request).first {
+            searchText = fetchedSearchText
+            searchText?.dateForSorting = Date()
         } else {
             // MARK: - Creating SearchText entity which will store news
-            let searchText = SearchText(context: context)
-            searchText.value = text
-            searchText.dateForSorting = Date()
+            searchText = SearchText(context: context)
+            searchText?.value = text
+            searchText?.dateForSorting = Date()
         }
         
         
@@ -76,6 +81,9 @@ final class NewsManager {
         context.saveContext() {
             CoreDataStack.instance.context.saveContext()
         }
+        guard let entity = searchText else { return nil }
+        
+        return entity
     }
     
     public func saveIsViewed(article: ArticlePreview) {
@@ -86,14 +94,7 @@ final class NewsManager {
         }
     }
     
-    private func saveNews(text: String, news: [Article]) {
-        // MARK: - Fetch SearchText entity which stores news
-        let request = SearchText.createFetchRequest() as NSFetchRequest<SearchText>
-        let predicate = NSPredicate(format: "value == %@", text)
-        request.predicate = predicate
-        
-        guard let searchText = try? context.fetch(request).first else { return }
-        
+    private func saveNews(searchText: SearchText, news: [Article]) {
         // MARK: - Creating an article object
         for article in news {
             // MARK: - Fetch existing news

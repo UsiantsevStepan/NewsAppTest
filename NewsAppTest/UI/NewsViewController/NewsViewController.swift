@@ -15,7 +15,7 @@ final class NewsViewController: UIViewController {
     private var isLoading = false
     private let newsView = NewsView()
     
-    var searchText: String?
+    var searchText: SearchText?
     
     override func loadView() {
         view = newsView
@@ -24,12 +24,12 @@ final class NewsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationItem.title = searchText
+        navigationItem.title = searchText?.value
         
         newsView.tableView.delegate = self
         newsView.tableView.dataSource = self
         
-        guard let searchText = searchText else { return }
+        guard let searchText = searchText?.value else { return }
         
         fetchedResultsManager = FetchedResultsManager(
             delegate: self,
@@ -142,9 +142,9 @@ extension NewsViewController: UITableViewDelegate {
         let object = fetchedResultsManager?.fetchedResultsController.object(at: indexPath)
         
         guard
+            let article = object,
             let urlString = object?.articlePath,
-            let url = URL(string: urlString),
-            let article = object
+            let url = URL(string: urlString)
         else { return }
         
         newsManager.saveIsViewed(article: article)
