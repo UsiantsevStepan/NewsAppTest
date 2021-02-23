@@ -5,7 +5,7 @@
 //  Created by Степан Усьянцев on 18.02.2021.
 //
 
-import UIKit
+import Foundation
 import CoreData
 
 final class NewsManager {
@@ -130,22 +130,5 @@ private extension NewsManager {
         dateFormatter.locale = .current
         dateFormatter.dateFormat = "dd MMMM yyyy"
         return dateFormatter.string(from: date)
-    }
-}
-
-extension ISO8601DateFormatter {
-    convenience init(_ formatOptions: Options) {
-        self.init()
-        self.formatOptions = formatOptions
-    }
-}
-
-extension Formatter {
-    static let iso8601withFractionalSeconds = ISO8601DateFormatter([.withInternetDateTime, .withFractionalSeconds])
-}
-
-extension Date {
-    var iso8601withFractionalSeconds: String {
-        return Formatter.iso8601withFractionalSeconds.string(from: self)
     }
 }

@@ -32,16 +32,15 @@ final class FooterView: UIView {
         ])
         
         pageActivityIndicator.style = .medium
+        pageActivityIndicator.hidesWhenStopped = true
     }
     
     func showActivityIndicator() {
-        pageActivityIndicator.isHidden = false
         pageActivityIndicator.startAnimating()
     }
     
     func hideActivityIndicator() {
         pageActivityIndicator.stopAnimating()
-        pageActivityIndicator.isHidden = true
     }
 }
 

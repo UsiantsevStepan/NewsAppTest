@@ -50,16 +50,14 @@ final class NewsViewController: UIViewController {
         newsManager.loadSerchedNews(searchText: searchText, date: date) { [weak self] error in
             guard let self = self else { return }
             
-            if let error = error {
-                DispatchQueue.main.async {
+            DispatchQueue.main.async {
+                if let error = error {
                     self.showError(error)
-                }
-            } else {
-                DispatchQueue.main.async {
+                } else {
                     self.newsView.footerView.hideActivityIndicator()
                 }
-                self.isLoading = false                
             }
+            self.isLoading = false
         }
     }
 }
@@ -113,9 +111,6 @@ extension NewsViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: NewsTableViewCell.reuseId, for: indexPath) as! NewsTableViewCell
         guard let article = fetchedResultsManager?.fetchedResultsController.object(at: indexPath) else { return cell }
         cell.configure(article: article)
-        cell.preservesSuperviewLayoutMargins = false
-        cell.separatorInset = UIEdgeInsets.zero
-        cell.layoutMargins = UIEdgeInsets.zero
         
         return cell
     }
@@ -134,19 +129,22 @@ extension NewsViewController: UITableViewDelegate {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         
-        if offsetY > 0, offsetY > contentHeight - scrollView.frame.height, !isLoading {
-            guard let date = fetchedResultsManager?.fetchedResultsController.fetchedObjects?.last?.dateForSorting else { return }
+        if !isLoading,
+           offsetY > 0,
+           offsetY > contentHeight - scrollView.frame.height,
+           let date = fetchedResultsManager?.fetchedResultsController.fetchedObjects?.last?.dateForSorting {
             loadPage(with: date)
         }
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         newsView.tableView.deselectRow(at: indexPath, animated: true)
+        let object = fetchedResultsManager?.fetchedResultsController.object(at: indexPath)
         
         guard
-            let urlString = fetchedResultsManager?.fetchedResultsController.object(at: indexPath).articlePath,
+            let urlString = object?.articlePath,
             let url = URL(string: urlString),
-            let article = fetchedResultsManager?.fetchedResultsController.object(at: indexPath)
+            let article = object
         else { return }
         
         newsManager.saveIsViewed(article: article)
